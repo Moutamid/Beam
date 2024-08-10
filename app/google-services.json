@@ -1,0 +1,655 @@
+{
+  "project_info": {
+    "project_number": "445765053911",
+    "firebase_url": "https://multistreamz-10cba-default-rtdb.firebaseio.com",
+    "project_id": "multistreamz-10cba",
+    "storage_bucket": "multistreamz-10cba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:e1edba9b807ca60195af92",
+        "android_client_info": {
+          "package_name": "com.example.studenttransportsecurity"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:3cb173686280957295af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.beam"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:2efd8e796226755195af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.callmanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:ca1890d4ba8c328695af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.chama"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-qf7mftv4vsngojrik8dc1qqf40nt9j0k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.moutamid.chama",
+            "certificate_hash": "1e3a26a5f7cc069683db796efde1ab18eebe2a95"
+          }
+        },
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:84a18fe381afa9a695af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.daiptv"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:b92432395c2d907895af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.messagesender"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:69962fec84233c8295af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.moneytransfer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:6d6196b2ce3b4e8095af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.moneytransferadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:37c567cf4f5ed38b95af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.peptidesadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-cap68sgfgdbup3qo9fo08agu2rtdmeop.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.moutamid.peptidesadmin",
+            "certificate_hash": "1e3a26a5f7cc069683db796efde1ab18eebe2a95"
+          }
+        },
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:11f1f55f581bb31695af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.peptidesapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:8b8c20900e4e4e7f95af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.souschef"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:1528d332a513981f95af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.sprachelernen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:71dc4adcd38fac6295af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.sprachelernenadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:3de2e0ad6800800995af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.trip4pet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-5do5hrqjslvqhe30qq85ndcqsq0cari7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.moutamid.trip4pet",
+            "certificate_hash": "1e3a26a5f7cc069683db796efde1ab18eebe2a95"
+          }
+        },
+        {
+          "client_id": "445765053911-e7aa3h13ro02eie3tssalcjabvp02llr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.moutamid.trip4pet",
+            "certificate_hash": "f39a3ca243502e996f2be8d87b2ec0391f576d60"
+          }
+        },
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:67ed0c4a0547b8cd95af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.trip4petadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:bcc7d5ff1cbcebcc95af92",
+        "android_client_info": {
+          "package_name": "com.moutamid.tvplayer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445765053911:android:aae7d777d2200ca395af92",
+        "android_client_info": {
+          "package_name": "com.nathan.souschef"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_sd758EZZxVITvxZIxVSa-BtbSB4Tr5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445765053911-db684sdt4lqvbde6h8rdplser2tu0k2v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "445765053911-hl7a2bfk3ghe3jl1d9g46brjqa8inq2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.moutamid.sprachelernen"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

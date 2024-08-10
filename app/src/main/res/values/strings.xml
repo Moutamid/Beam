@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Beam</string>
+    <string name="lorem">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Expedita facere facilis quasi tempore. Aut, placeat?</string>
+    <string name="lorem2">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab architecto asperiores culpa cum, cumque dolorum ea earum est itaque iure iusto maiores minima nostrum, officiis omnis praesentium quaerat qui quo, ratione sequi similique veritatis vitae!</string>
+    <string-array name="service_categories">
+        <item>Plumbing</item>
+        <item>Electrical</item>
+        <item>Car Repair &amp; Maintenance</item>
+        <item>Food Delivery</item>
+        <item>Cleaning Services</item>
+        <item>Home Improvement</item>
+        <item>Gardening &amp; Landscaping</item>
+        <item>Pest Control</item>
+        <item>Beauty &amp; Personal Care</item>
+        <item>Health &amp; Wellness</item>
+        <item>Tutoring &amp; Education</item>
+        <item>Pet Care</item>
+        <item>Movers &amp; Packers</item>
+        <item>Rent a Car</item>
+        <item>Construction Services</item>
+        <item>Painting &amp; Wallpapering</item>
+        <item>Appliance Repair</item>
+        <item>Locksmith Services</item>
+        <item>Handyman Services</item>
+        <item>Event Planning &amp; Catering</item>
+    </string-array>
+
+</resources>
