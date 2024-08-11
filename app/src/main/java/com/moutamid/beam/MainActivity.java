@@ -1,5 +1,6 @@
 package com.moutamid.beam;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,12 +13,16 @@ import android.widget.PopupWindow;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
+import com.moutamid.beam.activities.NewRequestActivity;
 import com.moutamid.beam.activities.SettingActivity;
+import com.moutamid.beam.activities.SplashActivity;
+import com.moutamid.beam.activities.WelcomeActivity;
 import com.moutamid.beam.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        requestLocationPermission();
 
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
             @Override
@@ -56,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         binding.toolbar.search.setOnClickListener(v -> {
             binding.toolbar.nameLayout.setVisibility(View.GONE);
             binding.toolbar.search.setVisibility(View.GONE);
+            binding.toolbar.newResponse.setVisibility(View.GONE);
             binding.toolbar.searchLayout.setVisibility(View.VISIBLE);
             isSearchEnable = true;
         });
@@ -63,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         binding.toolbar.back.setOnClickListener(v -> {
             binding.toolbar.nameLayout.setVisibility(View.VISIBLE);
             binding.toolbar.search.setVisibility(View.VISIBLE);
+            binding.toolbar.newResponse.setVisibility(View.VISIBLE);
             binding.toolbar.searchLayout.setVisibility(View.GONE);
             isSearchEnable = false;
         });
@@ -87,5 +96,16 @@ public class MainActivity extends AppCompatActivity {
             });
         });
 
+        binding.toolbar.newResponse.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, NewRequestActivity.class));
+        });
+
     }
+
+    private void requestLocationPermission() {
+        shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS);
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,android.Manifest.permission.POST_NOTIFICATIONS}, 111);
+    }
+
 }

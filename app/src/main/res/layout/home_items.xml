@@ -14,7 +14,7 @@
         app:cardCornerRadius="12dp"
         app:cardBackgroundColor="@color/white"
         app:cardElevation="0dp"
-        app:strokeWidth="0dp">
+        app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -97,4 +97,25 @@ public class SignupActivity extends AppCompatActivity {
 
         binding.create.setOnClickListener(v -> startActivity(new Intent(this, OtpActivity.class)));
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Cancel the animation when the activity is paused
+        if (listeningAnimation != null) {
+            listeningAnimation.cancel();
+        }
+        speechRecognitionManager.stopListening();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Cancel the animation when the activity is destroyed
+        if (listeningAnimation != null) {
+            listeningAnimation.cancel();
+        }
+        speechRecognitionManager.destroy();
+    }
+
 }

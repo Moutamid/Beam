@@ -7,135 +7,75 @@
     app:strokeWidth="0dp"
     app:cardElevation="0dp"
     app:cardCornerRadius="0dp"
-    app:cardBackgroundColor="@color/grey3">
+    app:cardBackgroundColor="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
+        android:gravity="center"
         android:padding="12dp">
-        
-        <LinearLayout
-            android:id="@+id/nameLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:scaleType="fitStart"
-                android:layout_weight="2"
-                android:src="@drawable/beam" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/title"
-                android:textSize="16sp"
-                android:layout_weight="1"
-                android:lines="1"
-                android:layout_marginStart="10dp"
-                tools:text="@string/app_name" />
-            
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/searchLayout"
-            android:gravity="center"
-            android:visibility="gone"
-            android:orientation="horizontal">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="100dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/arrow_left"
-                    android:layout_margin="10dp" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:boxCornerRadiusBottomEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                android:layout_weight="1"
-                app:boxCornerRadiusTopStart="12dp"
-                android:layout_marginHorizontal="5dp"
-                android:hint="Search...">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:inputType="textPersonName" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/searchBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="100dp"
-                app:cardBackgroundColor="@color/green_light_2"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/magnifying_glass"
-                    android:layout_margin="10dp" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/search"
+            android:id="@+id/back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:cardCornerRadius="100dp"
-            app:cardBackgroundColor="@color/green_light_2"
+            app:cardBackgroundColor="@color/white"
             app:cardElevation="0dp"
             app:strokeWidth="0dp">
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/magnifying_glass"
+                android:src="@drawable/arrow_left"
+                android:layout_margin="10dp" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/title"
+            android:textSize="16sp"
+            android:layout_weight="1"
+            android:lines="1"
+            android:layout_marginStart="10dp"
+            tools:text="@string/app_name" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="100dp"
+            app:cardBackgroundColor="@color/grey3"
+            android:visibility="gone"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/rotate"
                 android:layout_margin="10dp" />
 
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/more"
+            android:id="@+id/stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:cardCornerRadius="100dp"
-            android:layout_marginStart="10dp"
-            app:cardBackgroundColor="@color/green_light_2"
+            app:cardBackgroundColor="@color/transparent"
+            android:visibility="gone"
             app:cardElevation="0dp"
             app:strokeWidth="0dp">
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ellipsis"
-                android:layout_margin="10dp" />
+                android:src="@drawable/stop_sign"
+                app:tint="@color/red" />
 
         </com.google.android.material.card.MaterialCardView>
 

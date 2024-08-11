@@ -1,8 +1,7 @@
 package com.moutamid.beam.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,32 +9,28 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.moutamid.beam.MainActivity;
 import com.moutamid.beam.R;
-import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.databinding.ActivityRequestPreviewBinding;
 
-public class SplashActivity extends AppCompatActivity {
-
+public class RequestPreviewActivity extends AppCompatActivity {
+    ActivityRequestPreviewBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_splash);
+        binding = ActivityRequestPreviewBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        new Handler().postDelayed(() -> {
-            if (Constants.auth().getCurrentUser() != null) {
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
-                finish();
-            }else {
-                startActivity(new Intent(SplashActivity.this, RequestPreviewActivity.class));
-                finish();
-            }
-        }, 2000);
+        binding.toolbar.title.setText("Preview");
+        binding.toolbar.stop.setVisibility(View.VISIBLE);
+        binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+
 
     }
 }

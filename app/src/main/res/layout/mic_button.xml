@@ -4,6 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/listen"
+    app:cardBackgroundColor="@color/transparent"
     app:cardCornerRadius="100dp"
     app:cardElevation="0dp"
     app:strokeWidth="0dp">
@@ -19,7 +20,7 @@
             android:layout_centerInParent="true"
             android:background="@drawable/round"
             android:backgroundTint="@color/green_light_2"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
         <View
             android:id="@+id/foreground"
@@ -28,7 +29,7 @@
             android:layout_centerInParent="true"
             android:background="@drawable/round"
             android:backgroundTint="@color/green_light"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
         <View
             android:layout_width="80dp"

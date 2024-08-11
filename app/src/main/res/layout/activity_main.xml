@@ -5,17 +5,26 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey3"
+    android:background="@color/white"
     tools:context=".MainActivity">
 
-    <include layout="@layout/toolbar" android:id="@+id/toolbar" />
+    <include layout="@layout/toolbar_home" android:id="@+id/toolbar" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/categoryRC"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        tools:listitem="@layout/category"
+        android:layout_below="@id/toolbar"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/home_items"
-        android:layout_below="@id/toolbar" />
+        android:layout_below="@id/categoryRC" />
 
     <LinearLayout
         android:id="@+id/micLayout"

@@ -1,39 +1,35 @@
 package com.moutamid.beam.activities;
 
 import android.animation.AnimatorSet;
-import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
-import android.widget.Toast;
-import android.window.OnBackInvokedDispatcher;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.moutamid.beam.R;
-import com.moutamid.beam.databinding.ActivityLoginBinding;
+import com.moutamid.beam.databinding.ActivityNewRequestBinding;
 import com.moutamid.beam.utilis.MicAnimation;
 import com.moutamid.beam.utilis.SpeechRecognitionManager;
 
 import java.util.List;
 
-public class LoginActivity extends AppCompatActivity {
-    ActivityLoginBinding binding;
+public class NewRequestActivity extends AppCompatActivity {
+    private static final String TAG = "NewRequestActivity";
+    ActivityNewRequestBinding binding;
     AnimatorSet listeningAnimation;
     private SpeechRecognitionManager speechRecognitionManager;
-    private static final String TAG = "LoginActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        binding = ActivityNewRequestBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -41,15 +37,9 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                startActivity(new Intent(LoginActivity.this, WelcomeActivity.class));
-                finish();
-            }
-        });
-
-        binding.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        binding.toolbar.refresh.setVisibility(View.VISIBLE);
+        binding.toolbar.title.setText("New Request");
 
         listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
 
@@ -97,8 +87,6 @@ public class LoginActivity extends AppCompatActivity {
                 speechRecognitionManager.stopListening();
             }
         });
-
-        binding.create.setOnClickListener(v -> startActivity(new Intent(this, OtpActivity.class)));
 
     }
 
