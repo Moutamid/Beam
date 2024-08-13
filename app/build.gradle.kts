@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.volley)
     implementation(libs.ccp)
+    implementation(libs.imagepicker)
  //   implementation(libs.circleimageview)
 
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))

@@ -63,7 +63,7 @@
                                     android:drawableStart="@drawable/star"
                                     android:drawablePadding="10dp"
                                     app:drawableTint="@color/green"
-                                    tools:text="4.7 (70)" />
+                                    android:text="4.7 (70)" />
 
                             </LinearLayout>
 
@@ -80,7 +80,7 @@
                                     android:layout_height="wrap_content"
                                     android:textColor="@color/blue"
                                     android:textSize="16sp"
-                                    tools:text="Suleman Ijaz" />
+                                    android:text="Moutamid Waseem" />
 
                                 <TextView
                                     android:id="@+id/postTime"
@@ -89,7 +89,7 @@
                                     android:layout_marginVertical="5dp"
                                     android:textColor="@color/text"
                                     android:textSize="13sp"
-                                    tools:text="Posted 2d ago" />
+                                    android:text="Posted 2d ago" />
 
                                 <TextView
                                     android:id="@+id/deadline"
@@ -97,11 +97,12 @@
                                     android:layout_height="wrap_content"
                                     android:textColor="@color/text"
                                     android:textSize="13sp"
-                                    tools:text="Deadline 1h" />
+                                    android:text="Deadline 1h" />
 
                             </LinearLayout>
 
                             <com.google.android.material.button.MaterialButton
+                                android:id="@+id/reply"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:backgroundTint="@color/white"
@@ -119,7 +120,7 @@
                             android:layout_marginTop="10dp"
                             android:lines="3"
                             android:textColor="@color/text"
-                            tools:text="@string/lorem" />
+                            android:text="@string/lorem" />
 
                     </LinearLayout>
 
@@ -169,7 +170,7 @@
                         android:layout_marginStart="10dp"
                         android:layout_marginBottom="2dp"
                         android:textSize="18sp"
-                        tools:text="New Car" />
+                        android:text="New Car" />
 
                 </LinearLayout>
 
@@ -240,7 +241,7 @@
                             android:layout_marginBottom="2dp"
                             android:layout_weight="1"
                             android:textSize="16sp"
-                            tools:text="New Car" />
+                            android:text="New Car" />
 
                         <com.google.android.material.button.MaterialButton
                             android:layout_width="wrap_content"
@@ -255,7 +256,7 @@
                         android:layout_marginTop="10dp"
                         android:lines="3"
                         android:textColor="@color/text"
-                        tools:text="@string/lorem" />
+                        android:text="@string/lorem" />
 
                 </LinearLayout>
 

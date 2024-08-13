@@ -39,7 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/postTime"
-                tools:text="3 Km"
+                android:text="3 Km"
                 android:textColor="@color/text"
                 android:textSize="12sp"/>
 
@@ -47,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/name"
-                tools:text="Suleman Ijaz"
+                android:text="Suleman Ijaz"
                 android:textColor="@color/blue"
                 android:textSize="16sp"/>
 
@@ -55,7 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/deadline"
-                tools:text="3.2 (72)"
+                android:text="3.2 (72)"
                 android:drawableStart="@drawable/star_regular"
                 android:drawablePadding="10dp"
                 android:drawableTint="@color/green"

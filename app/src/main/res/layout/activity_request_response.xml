@@ -118,6 +118,7 @@
                         android:orientation="horizontal">
 
                         <com.google.android.material.button.MaterialButton
+                            android:id="@+id/mandatory"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             app:icon="@drawable/circle_plus"
@@ -129,12 +130,18 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1" />
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="DeadLine : "
+                            android:id="@+id/deadline" />
+
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/calender"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:clickable="true"
-                            android:layout_gravity="end"
+                            android:layout_marginStart="10dp"
                             app:cardBackgroundColor="@color/grey3"
                             app:cardCornerRadius="12dp"
                             app:strokeWidth="0dp">
@@ -149,6 +156,14 @@
                         </com.google.android.material.card.MaterialCardView>
 
                     </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/mandatoryRC"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/category" />
 
                 </LinearLayout>
 

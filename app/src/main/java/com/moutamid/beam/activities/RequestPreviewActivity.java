@@ -1,5 +1,6 @@
 package com.moutamid.beam.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -30,7 +31,9 @@ public class RequestPreviewActivity extends AppCompatActivity {
         binding.toolbar.stop.setVisibility(View.VISIBLE);
         binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-
+        binding.reply.setOnClickListener(v -> {
+            startActivity(new Intent(this, RequestResponseActivity.class));
+        });
 
     }
 }

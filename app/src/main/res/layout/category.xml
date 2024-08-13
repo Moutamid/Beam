@@ -8,6 +8,7 @@
     tools:text="Hello"
     android:layout_margin="10dp"
     app:strokeWidth="1dp"
+    android:id="@+id/text"
     app:strokeColor="@color/grey3"
     android:textColor="@color/black"
     android:backgroundTint="@color/white" />

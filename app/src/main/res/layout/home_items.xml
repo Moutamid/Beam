@@ -39,7 +39,7 @@
                         android:id="@+id/rating"
                         android:drawableStart="@drawable/star"
                         app:drawableTint="@color/green"
-                        tools:text="4.7 (70)"
+                        android:text="4.7 (70)"
                         android:drawablePadding="10dp" />
 
                 </LinearLayout>
@@ -55,14 +55,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/name"
-                        tools:text="Suleman Ijaz"
+                        android:text="Moutamid Waseem"
                         android:textColor="@color/blue"
                         android:textSize="16sp"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/postTime"
-                        tools:text="Posted 2d ago"
+                        android:text="Posted 2d ago"
                         android:layout_marginVertical="5dp"
                         android:textColor="@color/text"
                         android:textSize="13sp"/>
@@ -70,7 +70,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/deadline"
-                        tools:text="Deadline 1h"
+                        android:text="Deadline 1h"
                         android:textColor="@color/text"
                         android:textSize="13sp"/>
 
@@ -81,7 +81,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="@string/lorem"
+                android:text="@string/lorem"
                 android:textColor="@color/text"
                 android:layout_marginTop="10dp"
                 android:lines="3"
@@ -137,7 +137,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginBottom="2dp"
             android:textSize="18sp"
-            tools:text="New Car" />
+            android:text="New Car" />
 
     </LinearLayout>
 

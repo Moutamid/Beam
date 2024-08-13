@@ -43,7 +43,7 @@
                         android:id="@+id/name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        tools:text="Welcome "
+                        android:text="Moutamid Waseem"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
@@ -51,7 +51,7 @@
                         android:id="@+id/email"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        tools:text="example@gmail.com"
+                        android:text="+123456789"
                         android:textColor="@color/text"
                         android:textSize="16sp" />
 
