@@ -35,7 +35,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     @Override
     public void onBindViewHolder(@NonNull DocumentVh holder, int position) {
         DocumentModel model = list.get(holder.getAbsoluteAdapterPosition());
-        if (model.isDOc) {
+        if (model.isDoc) {
             holder.image.setVisibility(View.GONE);
             holder.name.setVisibility(View.VISIBLE);
             String fileName = FileUtils.getFileName(context, model.uri);

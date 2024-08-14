@@ -5,19 +5,29 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.fxn.stash.Stash;
 import com.moutamid.beam.R;
 import com.moutamid.beam.activities.UserProfileActivity;
+import com.moutamid.beam.models.UserModel;
+import com.moutamid.beam.utilis.Constants;
+
+import java.util.ArrayList;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactVH> {
-
     Context context;
-
-    public ContactsAdapter(Context context) {
+    ArrayList<UserModel> list;
+    UserModel currentUser;
+    public ContactsAdapter(Context context, ArrayList<UserModel> list) {
         this.context = context;
+        this.list = list;
+        currentUser = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
     }
 
     @NonNull
@@ -28,17 +38,29 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
 
     @Override
     public void onBindViewHolder(@NonNull ContactVH holder, int position) {
+        UserModel userModel = list.get(holder.getAbsoluteAdapterPosition());
+        holder.name.setText(userModel.name);
+        Glide.with(context).load(userModel.image).placeholder(R.drawable.profile_icon).into(holder.image);
+        double distance = Constants.calculateDistance(currentUser.location.lat, currentUser.location.log, userModel.location.lat, userModel.location.log);
+        holder.distance.setText(Constants.formatDistance(distance));
         holder.itemView.setOnClickListener(v -> context.startActivity(new Intent(context, UserProfileActivity.class)));
     }
 
     @Override
     public int getItemCount() {
-        return 10;
+        return list.size();
     }
 
     public static class ContactVH extends RecyclerView.ViewHolder {
+        ImageView image;
+        TextView distance, name, rating;
+
         public ContactVH(@NonNull View itemView) {
             super(itemView);
+            image = itemView.findViewById(R.id.image);
+            distance = itemView.findViewById(R.id.distance);
+            name = itemView.findViewById(R.id.name);
+            rating = itemView.findViewById(R.id.rating);
         }
     }
 

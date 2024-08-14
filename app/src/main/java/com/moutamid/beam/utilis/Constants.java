@@ -1,6 +1,10 @@
 package com.moutamid.beam.utilis;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.view.Window;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -9,6 +13,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.moutamid.beam.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,11 +23,78 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class Constants {
     public static final String USER = "USER";
     public static final String KEY = "KEY";
+    public static final String REQUESTS = "REQUESTS";
     public static final String STASH_USER = "STASH_USER";
+    public static Dialog dialog;
+
+    public static void initDialog(Context context) {
+        dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loading_dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.setCancelable(false);
+    }
+
+    public static void showDialog() {
+        dialog.show();
+    }
+
+    public static void dismissDialog() {
+        dialog.dismiss();
+    }
+
+    public static String formatDistance(double distance) {
+        if (distance < 1) {
+            return String.format("%.0f m", distance * 1000);
+        } else {
+            return String.format("%.1f km", distance);
+        }
+    }
+
+    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        double R = 6371;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c;
+        return distance;
+    }
+
+    public static String getTime(long timestamp) {
+        Calendar calendar = Calendar.getInstance();
+        long currentTime = System.currentTimeMillis();
+        calendar.setTimeInMillis(timestamp);
+        if (isSameWeek(currentTime, timestamp)) {
+            return isSameDay(currentTime, timestamp) ?
+                    new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(calendar.getTime()) :
+                    new SimpleDateFormat("MMM dd", Locale.getDefault()).format(calendar.getTime());
+        } else {
+            return new SimpleDateFormat("EEE", Locale.getDefault()).format(calendar.getTime());
+        }
+    }
+
+    private static boolean isSameDay(long timestamp1, long timestamp2) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+        return sdf.format(timestamp1).equals(sdf.format(timestamp2));
+    }
+
+    private static boolean isSameWeek(long timestamp1, long timestamp2) {
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTimeInMillis(timestamp1);
+        cal2.setTimeInMillis(timestamp2);
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.WEEK_OF_YEAR) == cal2.get(Calendar.WEEK_OF_YEAR);
+    }
 
     public static FirebaseAuth auth() {
         return FirebaseAuth.getInstance();

@@ -24,7 +24,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.moutamid.beam.R;
 import com.moutamid.beam.adapters.CategoryAdapter;
-import com.moutamid.beam.adapters.ContactsAdapter;
 import com.moutamid.beam.adapters.DocumentsAdapter;
 import com.moutamid.beam.databinding.ActivityRequestResponseBinding;
 import com.moutamid.beam.models.DocumentModel;
@@ -47,15 +46,8 @@ public class RequestResponseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityRequestResponseBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
         binding.toolbar.refresh.setVisibility(View.VISIBLE);
         binding.toolbar.title.setText("Request Response");
@@ -145,8 +137,8 @@ public class RequestResponseActivity extends AppCompatActivity {
                         list.add(enteredText);
                 }
             }
-            if (newRequest.Mandatory == null) newRequest.Mandatory = new ArrayList<>();
-            newRequest.Mandatory.addAll(list);
+            if (newRequest.mandatory == null) newRequest.mandatory = new ArrayList<>();
+            newRequest.mandatory.addAll(list);
             dialog.dismiss();
             updateView();
         });
@@ -154,8 +146,8 @@ public class RequestResponseActivity extends AppCompatActivity {
     }
 
     private void updateView() {
-        if (newRequest.Mandatory != null) {
-            CategoryAdapter adapter = new CategoryAdapter(this, newRequest.Mandatory);
+        if (newRequest.mandatory != null) {
+            CategoryAdapter adapter = new CategoryAdapter(this, newRequest.mandatory);
             binding.mandatoryRC.setAdapter(adapter);
         }
 

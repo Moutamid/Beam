@@ -12,6 +12,7 @@
     <color name="grey">#BFBFBF</color>
     <color name="grey2">#EFEDED</color>
     <color name="grey3">#F4F3F3</color>
+    <color name="grey4">#EEEEEE</color>
     <color name="text">#808080</color>
     <color name="stroke">#85808A</color>
 </resources>

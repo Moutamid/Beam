@@ -17,8 +17,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.fxn.stash.Stash;
 import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivityLoginBinding;
+import com.moutamid.beam.models.UserModel;
+import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.MicAnimation;
 import com.moutamid.beam.utilis.SpeechRecognitionManager;
 
@@ -32,15 +35,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -98,8 +94,29 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        binding.create.setOnClickListener(v -> startActivity(new Intent(this, OtpActivity.class)));
+        binding.create.setOnClickListener(v -> {
+            if (valid()) {
+                UserModel userModel = new UserModel();
+                userModel.phoneNumber = binding.ccp.getSelectedCountryCodeWithPlus() + binding.phone.getEditText().getText().toString();
+                Stash.put(Constants.STASH_USER, userModel);
+                startActivity(new Intent(this, OtpActivity.class));
+            }
+        });
 
+    }
+
+    private boolean valid() {
+        if (binding.phone.getEditText().getText().toString().isEmpty()){
+            binding.phone.getEditText().setError("required*");
+            binding.phone.getEditText().requestFocus();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override

@@ -4,17 +4,21 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -23,20 +27,39 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.fxn.stash.Stash;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.moutamid.beam.activities.NewRequestActivity;
 import com.moutamid.beam.activities.SettingActivity;
 import com.moutamid.beam.adapters.CategoryAdapter;
 import com.moutamid.beam.adapters.RequestsAdapter;
 import com.moutamid.beam.databinding.ActivityMainBinding;
+import com.moutamid.beam.models.LocationModel;
+import com.moutamid.beam.models.RequestModel;
+import com.moutamid.beam.models.UserModel;
+import com.moutamid.beam.utilis.Constants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     boolean isSearchEnable = false;
     private static final int PERMISSION_REQUEST_CODE = 100;
     private static final String TAG = "MainActivity";
+    UserModel userModel;
+    private FusedLocationProviderClient fusedLocationClient;
 
     private void requestMissingPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -150,21 +173,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        userModel = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        ArrayList<String> category = new ArrayList<>();
-        category.add("Automobile");
-        category.add("Food");
-        category.add("Plumbing");
-        category.add("Carpenter");
-        category.add("Mechanic");
+
+        FirebaseDatabase.getInstance().getReference().child("server_key").get()
+                .addOnSuccessListener(dataSnapshot -> {
+                    String key = dataSnapshot.getValue(String.class);
+                    Stash.put(Constants.KEY, key);
+                });
+
+        FirebaseMessaging.getInstance().subscribeToTopic(Constants.auth().getCurrentUser().getUid()).addOnSuccessListener(unused -> {
+            Log.d(TAG, "onCreate: SUBSCRIBE");
+        }).addOnFailureListener(e -> Log.d(TAG, "onCreate: " + e.getLocalizedMessage()));
+
+
+        String[] service_categories = getResources().getStringArray(R.array.service_categories);
+        ArrayList<String> category = new ArrayList<>(Arrays.asList(service_categories));
 
         CategoryAdapter categoryAdapter = new CategoryAdapter(this, category);
         binding.categoryRC.setAdapter(categoryAdapter);
@@ -231,16 +258,94 @@ public class MainActivity extends AppCompatActivity {
 
         binding.recycler.setLayoutManager(new LinearLayoutManager(this));
         binding.recycler.setHasFixedSize(false);
+    }
 
-        RequestsAdapter adapter = new RequestsAdapter(this);
-        binding.recycler.setAdapter(adapter);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        } else {
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, location -> {
+                        if (location != null) {
+                            Log.d(TAG, "onCreate: " + location.getLatitude());
+                            Log.d(TAG, "onCreate: " + location.getLongitude());
+                            updateLocation(location);
+                        } else {
+                            new MaterialAlertDialogBuilder(this)
+                                    .setMessage("This function requires a gps connection")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Open Settings", (dialog, which) -> {
+                                        dialog.dismiss();
+                                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                        startActivity(intent);
+                                    }).setNegativeButton("Close", (dialog, which) -> dialog.dismiss())
+                                    .show();
+                        }
+                    });
+        }
+
+        getList();
 
     }
 
-    private void requestLocationPermission() {
-        shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION);
-        shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS);
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.POST_NOTIFICATIONS}, 111);
+    private void getList() {
+        ArrayList<RequestModel> list = new ArrayList<>();
+        Constants.databaseReference().child(Constants.REQUESTS)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            list.clear();
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
+                                    RequestModel requestModel = dataSnapshot2.getValue(RequestModel.class);
+                                    list.add(requestModel);
+                                }
+                            }
+                        }
+                        RequestsAdapter adapter = new RequestsAdapter(MainActivity.this, list);
+                        binding.recycler.setAdapter(adapter);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.d("Permission", "Permission granted");
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, location -> {
+                        if (location != null) {
+                            updateLocation(location);
+                        } else {
+                            Toast.makeText(this, "Location not found", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    private void updateLocation(Location location) {
+        userModel.location = new LocationModel(location.getLatitude(), location.getLongitude());
+        Map<String, Object> loc = new HashMap<>();
+        loc.put("location", userModel.location);
+        Constants.databaseReference().child(Constants.USER).child(Constants.auth().getCurrentUser().getUid())
+                .updateChildren(loc).addOnSuccessListener(unused -> {
+                    Stash.put(Constants.STASH_USER, userModel);
+                });
+
+    }
 }

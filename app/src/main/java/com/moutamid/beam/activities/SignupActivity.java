@@ -14,8 +14,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.fxn.stash.Stash;
 import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivitySignupBinding;
+import com.moutamid.beam.models.UserModel;
+import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.MicAnimation;
 import com.moutamid.beam.utilis.SpeechRecognitionManager;
 
@@ -29,15 +32,8 @@ public class SignupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivitySignupBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -95,8 +91,31 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
-        binding.create.setOnClickListener(v -> startActivity(new Intent(this, OtpActivity.class)));
+        binding.create.setOnClickListener(v -> {
+            if (valid()) {
+                UserModel userModel = new UserModel();
+                userModel.name = binding.name.getEditText().getText().toString();
+                userModel.phoneNumber = binding.ccp.getSelectedCountryCodeWithPlus() + binding.phone.getEditText().getText().toString();
+                Stash.put(Constants.STASH_USER, userModel);
+                startActivity(new Intent(this, OtpActivity.class));
+            }
+        });
     }
+
+    private boolean valid() {
+        if (binding.phone.getEditText().getText().toString().isEmpty()){
+            binding.phone.getEditText().setError("required*");
+            binding.phone.getEditText().requestFocus();
+            return false;
+        }
+        if (binding.name.getEditText().getText().toString().isEmpty()){
+            binding.name.getEditText().setError("required*");
+            binding.name.getEditText().requestFocus();
+            return false;
+        }
+        return true;
+    }
+
 
     @Override
     protected void onPause() {

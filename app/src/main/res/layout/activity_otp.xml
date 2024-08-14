@@ -84,11 +84,13 @@
                 android:layout_marginTop="8dp" />
 
             <TextView
+                android:id="@+id/number"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Enter otp we sent"
+                android:layout_marginHorizontal="30dp"
                 android:textColor="@color/text"
-                android:textSize="18sp"/>
+                android:textSize="15sp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/otp"
@@ -114,10 +116,33 @@
                 android:id="@+id/create"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Continue"
+                android:text="Verify"
                 android:layout_marginTop="10dp"
                 android:layout_marginHorizontal="50dp"
                 android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginHorizontal="50dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    tools:text="01:45"
+                    android:id="@+id/timer" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Resend"
+                    android:enabled="false"
+                    android:id="@+id/resend" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

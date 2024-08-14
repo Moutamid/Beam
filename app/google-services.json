@@ -51,6 +51,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "445765053911-79pkt9fdmf19hrp6ocpl4266h1dp567c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.moutamid.beam",
+            "certificate_hash": "f39a3ca243502e996f2be8d87b2ec0391f576d60"
+          }
+        },
+        {
+          "client_id": "445765053911-omfu6c0kgpd2k2piqqgsmd1qdkj60unu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.moutamid.beam",
+            "certificate_hash": "1e3a26a5f7cc069683db796efde1ab18eebe2a95"
+          }
+        },
+        {
           "client_id": "445765053911-tcrblcv8qle0p56k2beencvnp0ebp426.apps.googleusercontent.com",
           "client_type": 3
         }
