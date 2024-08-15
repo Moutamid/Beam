@@ -12,12 +12,13 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
-
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
 
     <application
         android:name=".MyApp"
@@ -30,6 +31,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Beam"
         tools:targetApi="31">
+        <activity
+            android:name=".activities.EditProfileActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.UserProfileActivity"
             android:exported="false" />

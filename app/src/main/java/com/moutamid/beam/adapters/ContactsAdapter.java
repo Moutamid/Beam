@@ -19,6 +19,7 @@ import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactVH> {
     Context context;
@@ -44,6 +45,18 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         double distance = Constants.calculateDistance(currentUser.location.lat, currentUser.location.log, userModel.location.lat, userModel.location.log);
         holder.distance.setText(Constants.formatDistance(distance));
         holder.itemView.setOnClickListener(v -> context.startActivity(new Intent(context, UserProfileActivity.class)));
+
+        if (userModel.rating != null) {
+            float rating = 0;
+            for (double commentModel : userModel.rating) rating += commentModel;
+            float total = rating / userModel.rating.size();
+            String rate = String.format(Locale.getDefault(), "%.2f", total) + " (" + userModel.rating.size() + ")";
+            if (userModel.rating.size() > 1) holder.rating.setText(rate);
+            else holder.rating.setText(userModel.rating.get(0) + " (1)");
+        } else {
+            holder.rating.setText("0.0 (0)");
+        }
+
     }
 
     @Override

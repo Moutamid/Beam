@@ -16,15 +16,11 @@ import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.fxn.stash.Stash;
@@ -50,7 +46,6 @@ import com.moutamid.beam.utilis.Constants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -60,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     UserModel userModel;
     private FusedLocationProviderClient fusedLocationClient;
+    ArrayList<RequestModel> list;
+    RequestsAdapter adapter;
 
     private void requestMissingPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -178,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
         userModel = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        list = new ArrayList<>();
 
         FirebaseDatabase.getInstance().getReference().child("server_key").get()
                 .addOnSuccessListener(dataSnapshot -> {
@@ -192,8 +190,11 @@ public class MainActivity extends AppCompatActivity {
 
         String[] service_categories = getResources().getStringArray(R.array.service_categories);
         ArrayList<String> category = new ArrayList<>(Arrays.asList(service_categories));
-
-        CategoryAdapter categoryAdapter = new CategoryAdapter(this, category);
+        category.add(0, "All");
+        CategoryAdapter categoryAdapter = new CategoryAdapter(this, category, query -> {
+            if (query.equals("All")) adapter.getFilter().filter("");
+            else adapter.getFilter().filter(query);
+        });
         binding.categoryRC.setAdapter(categoryAdapter);
 
         requestMissingPermissions();
@@ -230,26 +231,35 @@ public class MainActivity extends AppCompatActivity {
             binding.toolbar.newResponse.setVisibility(View.VISIBLE);
             binding.toolbar.searchLayout.setVisibility(View.GONE);
             isSearchEnable = false;
+
+            adapter.getFilter().filter("");
+        });
+
+        binding.toolbar.searchBtn.setOnClickListener(v -> {
+            String query = binding.toolbar.searchEt.getEditText().getText().toString().trim();
+            adapter.getFilter().filter(query);
         });
 
         binding.toolbar.more.setOnClickListener(v -> {
-            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View customView = inflater.inflate(R.layout.buttons, null);
-            PopupWindow popupWindow = new PopupWindow(customView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-            popupWindow.showAsDropDown(v);
-            int[] location = new int[2];
-            v.getLocationOnScreen(location);
-            popupWindow.showAtLocation(v, Gravity.NO_GRAVITY, location[0], location[1]);
-            MaterialButton profile = customView.findViewById(R.id.profile);
-            MaterialButton settings = customView.findViewById(R.id.settings);
+            startActivity(new Intent(this, SettingActivity.class));
 
-            profile.setOnClickListener(v1 -> {
-                popupWindow.dismiss();
-            });
-            settings.setOnClickListener(v1 -> {
-                popupWindow.dismiss();
-                startActivity(new Intent(this, SettingActivity.class));
-            });
+//            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//            View customView = inflater.inflate(R.layout.buttons, null);
+//            PopupWindow popupWindow = new PopupWindow(customView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+//            popupWindow.showAsDropDown(v);
+//            int[] location = new int[2];
+//            v.getLocationOnScreen(location);
+//            popupWindow.showAtLocation(v, Gravity.NO_GRAVITY, location[0], location[1]);
+//            MaterialButton profile = customView.findViewById(R.id.profile);
+//            MaterialButton settings = customView.findViewById(R.id.settings);
+//
+//            profile.setOnClickListener(v1 -> {
+//                popupWindow.dismiss();
+//            });
+//            settings.setOnClickListener(v1 -> {
+//                popupWindow.dismiss();
+//                startActivity(new Intent(this, SettingActivity.class));
+//            });
         });
 
         binding.toolbar.newResponse.setOnClickListener(v -> {
@@ -294,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getList() {
-        ArrayList<RequestModel> list = new ArrayList<>();
+
         Constants.databaseReference().child(Constants.REQUESTS)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -308,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         }
-                        RequestsAdapter adapter = new RequestsAdapter(MainActivity.this, list);
+                        adapter = new RequestsAdapter(MainActivity.this, list);
                         binding.recycler.setAdapter(adapter);
                     }
 

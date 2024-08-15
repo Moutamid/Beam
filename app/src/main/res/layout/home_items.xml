@@ -39,7 +39,7 @@
                         android:id="@+id/rating"
                         android:drawableStart="@drawable/star"
                         app:drawableTint="@color/green"
-                        android:text="4.7 (70)"
+                        tools:text="0.0 (0)"
                         android:drawablePadding="10dp" />
 
                 </LinearLayout>
@@ -88,6 +88,27 @@
                 android:id="@+id/description" />
 
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/image"
+                    app:tint="@color/blue"
+                    android:id="@+id/containImage" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/paperclip"
+                    android:layout_marginStart="10dp"
+                    app:tint="@color/blue"
+                    android:id="@+id/containDocument" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -127,6 +148,7 @@
                 android:layout_alignEnd="@id/profile"
                 android:layout_alignBottom="@id/profile"
                 android:layout_marginBottom="10dp"
+                android:backgroundTint="@color/stroke"
                 android:background="@drawable/round" />
 
         </RelativeLayout>

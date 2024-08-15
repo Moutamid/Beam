@@ -31,6 +31,7 @@ public class Constants {
     public static final String USER = "USER";
     public static final String KEY = "KEY";
     public static final String REQUESTS = "REQUESTS";
+    public static final String PASS_REQUEST = "PASS_REQUEST";
     public static final String STASH_USER = "STASH_USER";
     public static Dialog dialog;
 

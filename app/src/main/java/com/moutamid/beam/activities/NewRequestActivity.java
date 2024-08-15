@@ -300,8 +300,6 @@ public class NewRequestActivity extends AppCompatActivity {
         newRequest.category = binding.category.getEditText().getText().toString();
         newRequest.timestamp = new Date().getTime();
         newRequest.userID = userModel.id;
-        newRequest.username = userModel.name;
-        newRequest.userImage = userModel.image;
 
         Constants.databaseReference().child(Constants.REQUESTS).child(userModel.id).child(newRequest.ID).setValue(newRequest)
                 .addOnSuccessListener(unused -> {
@@ -362,7 +360,7 @@ public class NewRequestActivity extends AppCompatActivity {
 
     private void updateView() {
         if (newRequest.mandatory != null) {
-            CategoryAdapter adapter = new CategoryAdapter(this, newRequest.mandatory);
+            CategoryAdapter adapter = new CategoryAdapter(this, newRequest.mandatory, null);
             binding.mandatoryRC.setAdapter(adapter);
         }
 

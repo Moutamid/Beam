@@ -6,9 +6,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     app:cornerRadius="12dp"
     tools:text="Hello"
-    android:layout_margin="10dp"
+    android:layout_marginStart="10dp"
     app:strokeWidth="1dp"
     android:id="@+id/text"
-    app:strokeColor="@color/grey3"
+    android:textStyle="bold"
+    app:strokeColor="@color/grey"
     android:textColor="@color/black"
     android:backgroundTint="@color/white" />

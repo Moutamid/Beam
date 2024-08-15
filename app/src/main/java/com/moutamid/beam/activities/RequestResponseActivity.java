@@ -147,7 +147,7 @@ public class RequestResponseActivity extends AppCompatActivity {
 
     private void updateView() {
         if (newRequest.mandatory != null) {
-            CategoryAdapter adapter = new CategoryAdapter(this, newRequest.mandatory);
+            CategoryAdapter adapter = new CategoryAdapter(this, newRequest.mandatory, null);
             binding.mandatoryRC.setAdapter(adapter);
         }
 

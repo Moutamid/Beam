@@ -1,6 +1,8 @@
 package com.moutamid.beam.adapters;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,18 +11,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.moutamid.beam.R;
+import com.moutamid.beam.listeners.CategoryListener;
 
 import java.util.ArrayList;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryVH> {
-
     Context context;
     ArrayList<String> list;
+    CategoryListener categoryListener;
+    private int selectedItemPosition = 0;
 
-    public CategoryAdapter(Context context, ArrayList<String> list) {
+    public CategoryAdapter(Context context, ArrayList<String> list, CategoryListener categoryListener) {
         this.context = context;
         this.list = list;
+        this.categoryListener = categoryListener;
     }
 
     @NonNull
@@ -33,6 +39,28 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     public void onBindViewHolder(@NonNull CategoryVH holder, int position) {
         String s = list.get(holder.getAbsoluteAdapterPosition());
         holder.text.setText(s);
+
+        if (categoryListener != null) {
+            if (holder.getAbsoluteAdapterPosition() == selectedItemPosition) {
+                holder.text.setTextColor(context.getColor(R.color.green));
+                holder.text.setStrokeColor(ColorStateList.valueOf(context.getColor(R.color.green)));
+                holder.text.setBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.green_light_2)));
+            } else {
+                holder.text.setTextColor(context.getColor(R.color.black));
+                holder.text.setStrokeColor(ColorStateList.valueOf(context.getColor(R.color.grey)));
+                holder.text.setBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.white)));
+            }
+
+            holder.itemView.setOnClickListener(v -> {
+                categoryListener.selected(s);
+
+                int previousItemPosition = selectedItemPosition;
+                selectedItemPosition = holder.getAbsoluteAdapterPosition();
+
+                notifyItemChanged(previousItemPosition);
+                notifyItemChanged(selectedItemPosition);
+            });
+        }
     }
 
     @Override
@@ -41,7 +69,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     }
 
     public static class CategoryVH extends RecyclerView.ViewHolder{
-        TextView text;
+        MaterialButton text;
         public CategoryVH(@NonNull View itemView) {
             super(itemView);
             text = itemView.findViewById(R.id.text);

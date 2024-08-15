@@ -58,6 +58,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/searchEt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:boxCornerRadiusBottomEnd="12dp"
@@ -66,7 +67,7 @@
                 android:layout_weight="1"
                 app:boxCornerRadiusTopStart="12dp"
                 android:layout_marginHorizontal="5dp"
-                android:hint="Search...">
+                android:hint="Search By Name ...">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
