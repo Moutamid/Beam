@@ -77,7 +77,7 @@ public class OtpActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = task.getResult().getUser();
-                        if (userModel.id == null) {
+                        if (userModel.name != null) {
                             userModel.id = user.getUid();
                             userModel.image = "";
                             userModel.location = new LocationModel();
@@ -94,11 +94,17 @@ public class OtpActivity extends AppCompatActivity {
                         } else {
                             Constants.databaseReference().child(Constants.USER).child(user.getUid()).get()
                                     .addOnSuccessListener(dataSnapshot -> {
-                                        userModel = dataSnapshot.getValue(UserModel.class);
-                                        Stash.put(Constants.STASH_USER, userModel);
-                                        Constants.dismissDialog();
-                                        startActivity(new Intent(OtpActivity.this, MainActivity.class));
-                                        finish();
+                                        if (dataSnapshot.exists()) {
+                                            userModel = dataSnapshot.getValue(UserModel.class);
+                                            Stash.put(Constants.STASH_USER, userModel);
+                                            Constants.dismissDialog();
+                                            startActivity(new Intent(OtpActivity.this, MainActivity.class));
+                                            finish();
+                                        } else {
+                                            Constants.auth().signOut();
+                                            getOnBackPressedDispatcher().onBackPressed();
+                                            Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show();
+                                        }
                                     }).addOnFailureListener(e -> {
                                         Constants.dismissDialog();
                                         Toast.makeText(OtpActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();

@@ -100,8 +100,10 @@ public class NewRequestActivity extends AppCompatActivity {
             if (dataSnapshot.exists()) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     UserModel user = snapshot.getValue(UserModel.class);
-                    if (!user.id.equals(Constants.auth().getCurrentUser().getUid())) {
-                        usersList.add(user);
+                    if (Constants.auth().getCurrentUser() != null) {
+                        if (!user.id.equals(Constants.auth().getCurrentUser().getUid())) {
+                            usersList.add(user);
+                        }
                     }
                 }
             }

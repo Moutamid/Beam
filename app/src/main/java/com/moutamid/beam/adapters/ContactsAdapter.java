@@ -44,7 +44,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         Glide.with(context).load(userModel.image).placeholder(R.drawable.profile_icon).into(holder.image);
         double distance = Constants.calculateDistance(currentUser.location.lat, currentUser.location.log, userModel.location.lat, userModel.location.log);
         holder.distance.setText(Constants.formatDistance(distance));
-        holder.itemView.setOnClickListener(v -> context.startActivity(new Intent(context, UserProfileActivity.class)));
 
         if (userModel.rating != null) {
             float rating = 0;
@@ -57,6 +56,9 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             holder.rating.setText("0.0 (0)");
         }
 
+        holder.itemView.setOnClickListener(v -> {
+            context.startActivity(new Intent(context, UserProfileActivity.class).putExtra("USER_ID", userModel.id));
+        });
     }
 
     @Override

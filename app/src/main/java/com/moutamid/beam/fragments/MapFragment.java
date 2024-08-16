@@ -14,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.fxn.stash.Stash;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -22,6 +24,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.FragmentMapBinding;
+import com.moutamid.beam.models.UserModel;
+import com.moutamid.beam.utilis.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,9 +41,14 @@ import java.util.List;
 public class MapFragment extends Fragment {
     GoogleMap mMap;
     FragmentMapBinding binding;
+    LatLng dropLocation;
 
     public MapFragment() {
         // Required empty public constructor
+    }
+
+    public MapFragment(LatLng dropLocation) {
+        this.dropLocation = dropLocation;
     }
 
     @Override
@@ -68,6 +77,11 @@ public class MapFragment extends Fragment {
             return;
         }
         mMap.setMyLocationEnabled(true);
+        UserModel userModel = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
+        LatLng currentLatLng = new LatLng(userModel.location.lat, userModel.location.log);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16f));
+        getPath(currentLatLng, dropLocation);
     };
 
 
@@ -79,7 +93,6 @@ public class MapFragment extends Fragment {
 
         new Thread(() -> {
             try {
-                // Create URL object
                 URL urlObj = new URL(url);
                 HttpURLConnection connection = (HttpURLConnection) urlObj.openConnection();
                 connection.connect();
@@ -152,7 +165,6 @@ public class MapFragment extends Fragment {
                     (((double) lng / 1E5)));
             poly.add(p);
         }
-
         return poly;
     }
 

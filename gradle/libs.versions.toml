@@ -15,6 +15,7 @@ stash = "1.3.2"
 playServicesLocation = "21.3.0"
 playServicesMaps = "19.0.0"
 volley = "1.2.1"
+simpleratingbar = "0.1.5"
 
 [libraries]
 ccp = { module = "com.hbb20:ccp", version.ref = "ccp" }
@@ -32,6 +33,7 @@ play-services-location = { module = "com.google.android.gms:play-services-locati
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 volley = { module = "com.android.volley:volley", version.ref = "volley" }
+simpleratingbar = { module = "com.iarcuschin:simpleratingbar", version.ref = "simpleratingbar" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

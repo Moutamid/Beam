@@ -86,7 +86,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/description"
+                    android:id="@+id/phone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -144,7 +144,7 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/attach_camera"
+                        android:id="@+id/attach_rating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:clickable="true"
@@ -211,7 +211,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginBottom="2dp"
                 android:textSize="18sp"
-                android:text="New Car" />
+                tools:text="New Car" />
 
         </LinearLayout>
 

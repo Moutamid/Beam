@@ -27,11 +27,6 @@ public class SettingActivity extends AppCompatActivity {
         binding.toolbar.title.setText("Settings");
         binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        UserModel userModel = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
-
-        binding.name.setText(userModel.name);
-        binding.email.setText(userModel.phoneNumber);
-
         binding.edit.setOnClickListener(v -> startActivity(new Intent(this, EditProfileActivity.class)));
 
         binding.logout.setOnClickListener(v -> {
@@ -47,5 +42,13 @@ public class SettingActivity extends AppCompatActivity {
                     .show();
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        UserModel userModel = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
+        binding.name.setText(userModel.name);
+        binding.email.setText(userModel.phoneNumber);
     }
 }
