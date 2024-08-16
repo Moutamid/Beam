@@ -3,14 +3,11 @@ package com.moutamid.beam.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.fxn.stash.Stash;
@@ -40,6 +37,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         userModel = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
         binding.name.getEditText().setText(userModel.name);
+        binding.category.getEditText().setText(userModel.category);
         Glide.with(this).load(userModel.image).placeholder(R.drawable.profile_icon).into(binding.profile);
 
         binding.profile.setOnClickListener(v -> {
@@ -60,8 +58,11 @@ public class EditProfileActivity extends AppCompatActivity {
                 }
             }
         });
-    }
 
+        String[] service_categories = getResources().getStringArray(R.array.service_categories);
+        ArrayAdapter<String> subject = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, service_categories);
+        binding.categoryList.setAdapter(subject);
+    }
 
     private void uploadImage() {
         Constants.storageReference(Constants.auth().getCurrentUser().getUid()).child("images").child(new SimpleDateFormat("ddMMyyyyhhmmss", Locale.getDefault()).format(new Date())).putFile(imageURI)
@@ -80,18 +81,21 @@ public class EditProfileActivity extends AppCompatActivity {
             Toast.makeText(this, "Name is required", Toast.LENGTH_SHORT).show();
             return false;
         }
+        if (binding.category.getEditText().getText().toString().isEmpty()) {
+            Toast.makeText(this, "Role is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
         return true;
     }
 
     private void uploadData(String img) {
         userModel.image = img;
-        userModel.name = binding.name.getEditText().getText().toString();
+        userModel.name = binding.name.getEditText().getText().toString().trim();
+        userModel.category = binding.category.getEditText().getText().toString().trim();
 
         Constants.databaseReference().child(Constants.USER).child(Constants.auth().getCurrentUser().getUid()).setValue(userModel)
                 .addOnSuccessListener(unused -> {
                     Constants.dismissDialog();
-                    userModel.image = img;
-                    userModel.name = binding.name.getEditText().getText().toString();
                     Stash.put(Constants.STASH_USER, userModel);
                     getOnBackPressedDispatcher().onBackPressed();
                 }).addOnFailureListener(e -> {

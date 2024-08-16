@@ -125,7 +125,6 @@ public class OtpActivity extends AppCompatActivity {
 
             @Override
             public void onTick(long millisUntilFinished) {
-                Log.d(TAG, "onTick: " + millisUntilFinished);
                 String time = new SimpleDateFormat("mm:ss", Locale.getDefault()).format(millisUntilFinished);
                 binding.timer.setText(time);
             }
@@ -152,6 +151,7 @@ public class OtpActivity extends AppCompatActivity {
         @Override
         public void onVerificationCompleted(@NonNull PhoneAuthCredential c) {
             final String code = c.getSmsCode();
+            Log.d(TAG, "onVerificationCompleted: ");
             if (code!=null) {
                 binding.otp.getEditText().setText(code);
             }
@@ -177,6 +177,8 @@ public class OtpActivity extends AppCompatActivity {
         @Override
         public void onCodeSent(@NonNull String s, @NonNull PhoneAuthProvider.ForceResendingToken token) {
             super.onCodeSent(s, token);
+            Log.d(TAG, "onCodeSent: ");
+            Toast.makeText(OtpActivity.this, "Verification Sent", Toast.LENGTH_SHORT).show();
             verificationId = s;
         }
     };

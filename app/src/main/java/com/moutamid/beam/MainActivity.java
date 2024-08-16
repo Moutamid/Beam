@@ -304,13 +304,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getList() {
-
         Constants.databaseReference().child(Constants.REQUESTS)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        list = new ArrayList<>();
                         if (snapshot.exists()) {
-                            list.clear();
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                 for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                                     RequestModel requestModel = dataSnapshot2.getValue(RequestModel.class);
@@ -318,6 +317,15 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         }
+
+                        if (list.isEmpty()) {
+                            binding.noLayout.setVisibility(View.VISIBLE);
+                            binding.recycler.setVisibility(View.GONE);
+                        } else {
+                            binding.noLayout.setVisibility(View.GONE);
+                            binding.recycler.setVisibility(View.VISIBLE);
+                        }
+
                         adapter = new RequestsAdapter(MainActivity.this, list);
                         binding.recycler.setAdapter(adapter);
                     }

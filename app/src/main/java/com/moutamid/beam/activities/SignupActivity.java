@@ -6,13 +6,10 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.fxn.stash.Stash;
 import com.moutamid.beam.R;
@@ -29,6 +26,7 @@ public class SignupActivity extends AppCompatActivity {
     AnimatorSet listeningAnimation;
     private SpeechRecognitionManager speechRecognitionManager;
     private static final String TAG = "SignupActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,19 +61,32 @@ public class SignupActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onBeginningOfSpeech() {}
+            public void onBeginningOfSpeech() {
+            }
+
             @Override
-            public void onBufferReceived(byte[] buffer) {}
+            public void onBufferReceived(byte[] buffer) {
+            }
+
             @Override
-            public void onEndOfSpeech() {}
+            public void onEndOfSpeech() {
+            }
+
             @Override
-            public void onRmsChanged(float rmsdB) {}
+            public void onRmsChanged(float rmsdB) {
+            }
+
             @Override
-            public void onReadyForSpeech(Bundle params) {}
+            public void onReadyForSpeech(Bundle params) {
+            }
+
             @Override
-            public void onPartialResults(Bundle partialResults) {}
+            public void onPartialResults(Bundle partialResults) {
+            }
+
             @Override
-            public void onEvent(int eventType, Bundle params) {}
+            public void onEvent(int eventType, Bundle params) {
+            }
         });
 
         speechRecognitionManager.startListening();
@@ -91,11 +102,16 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
+        String[] service_categories = getResources().getStringArray(R.array.service_categories);
+        ArrayAdapter<String> subject = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, service_categories);
+        binding.categoryList.setAdapter(subject);
+
         binding.create.setOnClickListener(v -> {
             if (valid()) {
                 UserModel userModel = new UserModel();
-                userModel.name = binding.name.getEditText().getText().toString();
-                userModel.phoneNumber = binding.ccp.getSelectedCountryCodeWithPlus() + binding.phone.getEditText().getText().toString();
+                userModel.name = binding.name.getEditText().getText().toString().trim();
+                userModel.category = binding.category.getEditText().getText().toString().trim();
+                userModel.phoneNumber = binding.ccp.getSelectedCountryCodeWithPlus() + binding.phone.getEditText().getText().toString().trim();
                 Stash.put(Constants.STASH_USER, userModel);
                 startActivity(new Intent(this, OtpActivity.class));
             }
@@ -103,14 +119,19 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private boolean valid() {
-        if (binding.phone.getEditText().getText().toString().isEmpty()){
+        if (binding.name.getEditText().getText().toString().isEmpty()) {
+            binding.name.getEditText().setError("required*");
+            binding.name.getEditText().requestFocus();
+            return false;
+        }
+        if (binding.phone.getEditText().getText().toString().isEmpty()) {
             binding.phone.getEditText().setError("required*");
             binding.phone.getEditText().requestFocus();
             return false;
         }
-        if (binding.name.getEditText().getText().toString().isEmpty()){
-            binding.name.getEditText().setError("required*");
-            binding.name.getEditText().requestFocus();
+        if (binding.category.getEditText().getText().toString().isEmpty()) {
+            binding.category.getEditText().setError("required*");
+            binding.category.getEditText().requestFocus();
             return false;
         }
         return true;

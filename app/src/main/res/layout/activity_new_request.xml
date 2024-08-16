@@ -155,7 +155,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            tools:text="DeadLine : "
+                            android:text="DeadLine : "
                             android:id="@+id/deadline" />
 
                         <com.google.android.material.card.MaterialCardView

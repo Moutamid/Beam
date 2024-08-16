@@ -2,7 +2,9 @@ package com.moutamid.beam.activities;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,28 +13,36 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
+import com.bumptech.glide.Glide;
+import com.fxn.stash.Stash;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.UploadTask;
 import com.moutamid.beam.R;
 import com.moutamid.beam.adapters.CategoryAdapter;
 import com.moutamid.beam.adapters.DocumentsAdapter;
 import com.moutamid.beam.databinding.ActivityRequestResponseBinding;
+import com.moutamid.beam.models.DocumentLinkModel;
 import com.moutamid.beam.models.DocumentModel;
 import com.moutamid.beam.models.RequestModel;
+import com.moutamid.beam.models.UserModel;
+import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.FileUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 
 public class RequestResponseActivity extends AppCompatActivity {
     ActivityRequestResponseBinding binding;
@@ -41,8 +51,11 @@ public class RequestResponseActivity extends AppCompatActivity {
     private static final int PICK_DOCUMENT = 1003;
     RequestModel newRequest;
     ArrayList<DocumentModel> list;
+    ArrayList<DocumentLinkModel> documents;
+    ProgressDialog progressDialog;
     final Calendar calendar = Calendar.getInstance();
-
+    RequestModel requestModel;
+    UserModel stash;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,11 +65,26 @@ public class RequestResponseActivity extends AppCompatActivity {
         binding.toolbar.refresh.setVisibility(View.VISIBLE);
         binding.toolbar.title.setText("Request Response");
 
+        newRequest = new RequestModel();
+        list = new ArrayList<>();
+        documents = new ArrayList<>();
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Uploading Document ... ");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setCancelable(false);
+        progressDialog.setMax(100);
+
+        requestModel = (RequestModel) Stash.getObject(Constants.PASS_REQUEST, RequestModel.class);
+        stash = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
+
+        Glide.with(RequestResponseActivity.this).load(stash.image).placeholder(R.drawable.profile_icon).into(binding.profileImage);
+
         DatePickerDialog.OnDateSetListener date = (datePicker, year, month, day) -> {
             calendar.set(Calendar.YEAR, year);
             calendar.set(Calendar.MONTH, month);
             calendar.set(Calendar.DAY_OF_MONTH, day);
-
+            requestModel.deadline = calendar.getTime().getTime();
             binding.deadline.setText("Deadline : " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
         };
 
@@ -64,6 +92,35 @@ public class RequestResponseActivity extends AppCompatActivity {
             new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
         });
 
+        Constants.databaseReference().child(Constants.USER).child(requestModel.userID)
+                .get().addOnSuccessListener(dataSnapshot -> {
+                    if (dataSnapshot.exists()) {
+                        UserModel userModel = dataSnapshot.getValue(UserModel.class);
+                        Glide.with(RequestResponseActivity.this).load(userModel.image).placeholder(R.drawable.profile_icon).into(binding.image);
+                        if (userModel.rating != null) {
+                            float rating = 0;
+                            for (double commentModel : userModel.rating) rating += commentModel;
+                            float total = rating / userModel.rating.size();
+                            String rate = String.format(Locale.getDefault(), "%.2f", total) + " (" + userModel.rating.size() + ")";
+                            if (userModel.rating.size() > 1) binding.rating.setText(rate);
+                            else binding.rating.setText(userModel.rating.get(0) + " (1)");
+                        } else {
+                            binding.rating.setText("0.0 (0)");
+                        }
+                    }
+                }).addOnFailureListener(e -> {
+                    Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+        binding.heading.setText(requestModel.title);
+        if (requestModel.documents != null) {
+            if (!requestModel.documents.isEmpty()) {
+                boolean hasDoc = requestModel.documents.stream().anyMatch(doc -> doc.isDoc);
+                boolean hasNonDoc = requestModel.documents.stream().anyMatch(doc -> !doc.isDoc);
+                if (hasDoc) binding.containDocument.setVisibility(View.VISIBLE);
+                if (hasNonDoc) binding.containImage.setVisibility(View.VISIBLE);
+            }
+        }
 
         binding.mandatory.setOnClickListener(v -> {
             addMandotory();
@@ -94,6 +151,83 @@ public class RequestResponseActivity extends AppCompatActivity {
             startActivityForResult(intent, PICK_DOCUMENT);
         });
 
+        binding.send.setOnClickListener(v -> {
+            if (valid()) {
+                if (list.isEmpty()) {
+                    uploadModel();
+                } else {
+                    uploadDocuments(0);
+                }
+            }
+        });
+
+    }
+
+    private void uploadDocuments(int i) {
+        progressDialog.show();
+        double progressPerDocument = 100.0 / list.size();
+        if (i != list.size()) {
+            DocumentModel document = list.get(i);
+            String fileName = FileUtils.getFileName(this, document.uri);
+            Constants.storageReference(Constants.auth().getCurrentUser().getUid()).child(fileName).putFile(document.uri)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(uri -> {
+                            documents.add(new DocumentLinkModel(uri.toString(), fileName, document.isDoc));
+                            uploadDocuments(i + 1);
+                        });
+                    }).addOnFailureListener(e -> {
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+                            double uploadedBytes = snapshot.getBytesTransferred();
+                            double overallProgress = (i * progressPerDocument) + ((uploadedBytes / snapshot.getTotalByteCount()) * progressPerDocument);
+                            progressDialog.setProgress((int) overallProgress);
+                        }
+                    });
+        } else {
+            progressDialog.dismiss();
+            uploadModel();
+        }
+    }
+
+    private void uploadModel() {
+        Constants.showDialog();
+        newRequest.documents = new ArrayList<>(documents);
+        newRequest.ID = UUID.randomUUID().toString();
+        newRequest.title = binding.tit.getEditText().getText().toString();
+        newRequest.description = binding.description.getText().toString();
+        newRequest.category = stash.category;
+        newRequest.timestamp = new Date().getTime();
+        newRequest.userID = stash.id;
+
+        Constants.databaseReference().child(Constants.REQUESTS_REPLY).child(requestModel.ID).child(newRequest.ID).setValue(newRequest)
+                .addOnSuccessListener(unused -> {
+                    Constants.dismissDialog();
+                    Toast.makeText(this, "Reply Added", Toast.LENGTH_SHORT).show();
+                    getOnBackPressedDispatcher().onBackPressed();
+                }).addOnFailureListener(e -> {
+                    Constants.dismissDialog();
+                    Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private boolean valid() {
+        if (binding.tit.getEditText().getText().toString().isEmpty()){
+            binding.tit.getEditText().setError("required*");
+            binding.tit.getEditText().requestFocus();
+            return false;
+        }
+        if (binding.description.getText().toString().isEmpty()){
+            binding.description.setError("required*");
+            binding.description.requestFocus();
+            return false;
+        }
+        if (newRequest.deadline == 0) {
+            Toast.makeText(this, "Deadline is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     private void addMandotory() {
@@ -158,9 +292,14 @@ public class RequestResponseActivity extends AppCompatActivity {
             binding.documentsRC.setVisibility(View.VISIBLE);
             binding.noDocument.setVisibility(View.GONE);
         }
-
         DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, list);
         binding.documentsRC.setAdapter(documentsAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Constants.initDialog(this);
     }
 
     @Override

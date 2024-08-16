@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -96,26 +97,33 @@ public class NewRequestActivity extends AppCompatActivity {
         ArrayAdapter<String> subject = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, service_categories);
         binding.categoryList.setAdapter(subject);
 
-        Constants.databaseReference().child(Constants.USER).get().addOnSuccessListener(dataSnapshot -> {
-            if (dataSnapshot.exists()) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    UserModel user = snapshot.getValue(UserModel.class);
-                    if (Constants.auth().getCurrentUser() != null) {
-                        if (!user.id.equals(Constants.auth().getCurrentUser().getUid())) {
-                            usersList.add(user);
+        binding.categoryList.setOnItemClickListener((parent, view, position, id) -> {
+            String category = service_categories[position];
+            Log.d(TAG, "onCreate: " + category);
+
+            Constants.databaseReference().child(Constants.USER).get().addOnSuccessListener(dataSnapshot -> {
+                if (dataSnapshot.exists()) {
+                    usersList.clear();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        UserModel user = snapshot.getValue(UserModel.class);
+                        if (Constants.auth().getCurrentUser() != null) {
+                            if (!user.id.equals(Constants.auth().getCurrentUser().getUid()) && user.category.equals(category)) {
+                                usersList.add(user);
+                            }
                         }
                     }
                 }
-            }
-            if (usersList.isEmpty()) {
-                binding.noContact.setVisibility(View.VISIBLE);
-                binding.contactRC.setVisibility(View.GONE);
-            } else {
-                binding.noContact.setVisibility(View.GONE);
-                binding.contactRC.setVisibility(View.VISIBLE);
-            }
-            ContactsAdapter adapter = new ContactsAdapter(this, usersList);
-            binding.contactRC.setAdapter(adapter);
+                if (usersList.isEmpty()) {
+                    binding.noContact.setVisibility(View.VISIBLE);
+                    binding.contactRC.setVisibility(View.GONE);
+                } else {
+                    binding.noContact.setVisibility(View.GONE);
+                    binding.contactRC.setVisibility(View.VISIBLE);
+                }
+                ContactsAdapter adapter = new ContactsAdapter(NewRequestActivity.this, usersList);
+                binding.contactRC.setAdapter(adapter);
+            });
+
         });
 
         DatePickerDialog.OnDateSetListener date = (datePicker, year, month, day) -> {

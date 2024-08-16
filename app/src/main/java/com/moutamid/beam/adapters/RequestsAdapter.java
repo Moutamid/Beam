@@ -89,11 +89,13 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         holder.containDocument.setVisibility(View.GONE);
         holder.containImage.setVisibility(View.GONE);
 
-        if (!requestModel.documents.isEmpty()) {
-            boolean hasDoc = requestModel.documents.stream().anyMatch(doc -> doc.isDoc);
-            boolean hasNonDoc = requestModel.documents.stream().anyMatch(doc -> !doc.isDoc);
-            if (hasDoc) holder.containDocument.setVisibility(View.VISIBLE);
-            if (hasNonDoc) holder.containImage.setVisibility(View.VISIBLE);
+        if (requestModel.documents != null) {
+            if (!requestModel.documents.isEmpty()) {
+                boolean hasDoc = requestModel.documents.stream().anyMatch(doc -> doc.isDoc);
+                boolean hasNonDoc = requestModel.documents.stream().anyMatch(doc -> !doc.isDoc);
+                if (hasDoc) holder.containDocument.setVisibility(View.VISIBLE);
+                if (hasNonDoc) holder.containImage.setVisibility(View.VISIBLE);
+            }
         }
 
         holder.itemView.setOnClickListener(v -> {

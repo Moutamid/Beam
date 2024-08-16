@@ -57,24 +57,26 @@ public class RequestPreviewActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         UserModel userModel = snapshot.getValue(UserModel.class);
-                        binding.username.setText(userModel.name);
-                        Glide.with(RequestPreviewActivity.this).load(userModel.image).placeholder(R.drawable.profile_icon).into(binding.image);
+                        if (!isDestroyed()) {
+                            binding.username.setText(userModel.name);
+                            Glide.with(RequestPreviewActivity.this).load(userModel.image).placeholder(R.drawable.profile_icon).into(binding.image);
 
-                        if (userModel.status) {
-                            binding.status.setBackgroundTintList(ColorStateList.valueOf(RequestPreviewActivity.this.getColor(R.color.green)));
-                        } else {
-                            binding.status.setBackgroundTintList(ColorStateList.valueOf(RequestPreviewActivity.this.getColor(R.color.stroke)));
-                        }
+                            if (userModel.status) {
+                                binding.status.setBackgroundTintList(ColorStateList.valueOf(RequestPreviewActivity.this.getColor(R.color.green)));
+                            } else {
+                                binding.status.setBackgroundTintList(ColorStateList.valueOf(RequestPreviewActivity.this.getColor(R.color.stroke)));
+                            }
 
-                        if (userModel.rating != null) {
-                            float rating = 0;
-                            for (double commentModel : userModel.rating) rating += commentModel;
-                            float total = rating / userModel.rating.size();
-                            String rate = String.format(Locale.getDefault(), "%.2f", total) + " (" + userModel.rating.size() + ")";
-                            if (userModel.rating.size() > 1) binding.rating.setText(rate);
-                            else binding.rating.setText(userModel.rating.get(0) + " (1)");
-                        } else {
-                            binding.rating.setText("0.0 (0)");
+                            if (userModel.rating != null) {
+                                float rating = 0;
+                                for (double commentModel : userModel.rating) rating += commentModel;
+                                float total = rating / userModel.rating.size();
+                                String rate = String.format(Locale.getDefault(), "%.2f", total) + " (" + userModel.rating.size() + ")";
+                                if (userModel.rating.size() > 1) binding.rating.setText(rate);
+                                else binding.rating.setText(userModel.rating.get(0) + " (1)");
+                            } else {
+                                binding.rating.setText("0.0 (0)");
+                            }
                         }
                     }
 
@@ -87,11 +89,13 @@ public class RequestPreviewActivity extends AppCompatActivity {
         binding.containDocument.setVisibility(View.GONE);
         binding.containImage.setVisibility(View.GONE);
 
-        if (!requestModel.documents.isEmpty()) {
-            boolean hasDoc = requestModel.documents.stream().anyMatch(doc -> doc.isDoc);
-            boolean hasNonDoc = requestModel.documents.stream().anyMatch(doc -> !doc.isDoc);
-            if (hasDoc) binding.containDocument.setVisibility(View.VISIBLE);
-            if (hasNonDoc) binding.containImage.setVisibility(View.VISIBLE);
+        if (requestModel.documents != null) {
+            if (!requestModel.documents.isEmpty()) {
+                boolean hasDoc = requestModel.documents.stream().anyMatch(doc -> doc.isDoc);
+                boolean hasNonDoc = requestModel.documents.stream().anyMatch(doc -> !doc.isDoc);
+                if (hasDoc) binding.containDocument.setVisibility(View.VISIBLE);
+                if (hasNonDoc) binding.containImage.setVisibility(View.VISIBLE);
+            }
         }
 
         if (requestModel.mandatory != null) {
