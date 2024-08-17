@@ -1,7 +1,6 @@
 package com.moutamid.beam;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -9,11 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -26,7 +21,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.fxn.stash.Stash;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -192,8 +186,10 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<String> category = new ArrayList<>(Arrays.asList(service_categories));
         category.add(0, "All");
         CategoryAdapter categoryAdapter = new CategoryAdapter(this, category, query -> {
-            if (query.equals("All")) adapter.getFilter().filter("");
-            else adapter.getFilter().filter(query);
+            if (adapter != null) {
+                if (query.equals("All")) adapter.getFilter().filter("");
+                else adapter.getFilter().filter(query);
+            }
         });
         binding.categoryRC.setAdapter(categoryAdapter);
 
@@ -273,6 +269,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Constants.initDialog(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -300,14 +297,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         getList();
-
     }
 
     private void getList() {
+        Constants.showDialog();
         Constants.databaseReference().child(Constants.REQUESTS)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Constants.dismissDialog();
                         list = new ArrayList<>();
                         if (snapshot.exists()) {
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
@@ -332,6 +330,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
+                        Constants.dismissDialog();
                         Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });

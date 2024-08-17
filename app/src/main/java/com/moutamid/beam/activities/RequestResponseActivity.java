@@ -4,7 +4,6 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -23,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.fxn.stash.Stash;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.UploadTask;
@@ -34,6 +34,7 @@ import com.moutamid.beam.models.DocumentLinkModel;
 import com.moutamid.beam.models.DocumentModel;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
+import com.moutamid.beam.notification.FcmNotificationsSender;
 import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.FileUtils;
 
@@ -56,6 +57,7 @@ public class RequestResponseActivity extends AppCompatActivity {
     final Calendar calendar = Calendar.getInstance();
     RequestModel requestModel;
     UserModel stash;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,11 +82,20 @@ public class RequestResponseActivity extends AppCompatActivity {
 
         Glide.with(RequestResponseActivity.this).load(stash.image).placeholder(R.drawable.profile_icon).into(binding.profileImage);
 
+        binding.toolbar.refresh.setOnClickListener(v -> {
+            binding.tit.getEditText().setText("");
+            binding.description.setText("");
+            Intent intent = getIntent();
+            finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            startActivity(intent);
+        });
+
         DatePickerDialog.OnDateSetListener date = (datePicker, year, month, day) -> {
             calendar.set(Calendar.YEAR, year);
             calendar.set(Calendar.MONTH, month);
             calendar.set(Calendar.DAY_OF_MONTH, day);
-            requestModel.deadline = calendar.getTime().getTime();
+            newRequest.deadline = calendar.getTime().getTime();
             binding.deadline.setText("Deadline : " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
         };
 
@@ -205,6 +216,7 @@ public class RequestResponseActivity extends AppCompatActivity {
                 .addOnSuccessListener(unused -> {
                     Constants.dismissDialog();
                     Toast.makeText(this, "Reply Added", Toast.LENGTH_SHORT).show();
+                    new FcmNotificationsSender("/topics/" + requestModel.userID, stash.name, newRequest.title, this, this).SendNotifications();
                     getOnBackPressedDispatcher().onBackPressed();
                 }).addOnFailureListener(e -> {
                     Constants.dismissDialog();
@@ -213,12 +225,12 @@ public class RequestResponseActivity extends AppCompatActivity {
     }
 
     private boolean valid() {
-        if (binding.tit.getEditText().getText().toString().isEmpty()){
+        if (binding.tit.getEditText().getText().toString().isEmpty()) {
             binding.tit.getEditText().setError("required*");
             binding.tit.getEditText().requestFocus();
             return false;
         }
-        if (binding.description.getText().toString().isEmpty()){
+        if (binding.description.getText().toString().isEmpty()) {
             binding.description.setError("required*");
             binding.description.requestFocus();
             return false;
@@ -279,6 +291,8 @@ public class RequestResponseActivity extends AppCompatActivity {
 
     }
 
+    DocumentsAdapter documentsAdapter;
+
     private void updateView() {
         if (newRequest.mandatory != null) {
             CategoryAdapter adapter = new CategoryAdapter(this, newRequest.mandatory, null);
@@ -292,7 +306,26 @@ public class RequestResponseActivity extends AppCompatActivity {
             binding.documentsRC.setVisibility(View.VISIBLE);
             binding.noDocument.setVisibility(View.GONE);
         }
-        DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, list);
+        documentsAdapter = new DocumentsAdapter(this, list, pos -> {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("Remove Attachment")
+                    .setMessage("Are you sure you want to remove this attachment?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        dialog.dismiss();
+                        list.remove(pos);
+                        documentsAdapter.notifyItemRemoved(pos);
+
+                        if (list.isEmpty()) {
+                            binding.documentsRC.setVisibility(View.GONE);
+                            binding.noDocument.setVisibility(View.VISIBLE);
+                        } else {
+                            binding.documentsRC.setVisibility(View.VISIBLE);
+                            binding.noDocument.setVisibility(View.GONE);
+                        }
+
+                    }).setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                    .show();
+        });
         binding.documentsRC.setAdapter(documentsAdapter);
     }
 

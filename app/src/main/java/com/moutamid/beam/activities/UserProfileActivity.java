@@ -1,8 +1,10 @@
 package com.moutamid.beam.activities;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +59,11 @@ public class UserProfileActivity extends AppCompatActivity {
                 binding.name.setText(userModel.name);
                 binding.phone.setText(userModel.phoneNumber);
                 Glide.with(this).load(userModel.image).placeholder(R.drawable.profile_icon).into(binding.image);
+
+                binding.phone.setOnClickListener(v -> {
+                    Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + userModel.phoneNumber));
+                    startActivity(intent);
+                });
 
                 if (userModel.status) {
                     binding.status.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.green)));

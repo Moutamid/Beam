@@ -12,22 +12,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.moutamid.beam.R;
+import com.moutamid.beam.models.DocumentLinkModel;
 import com.moutamid.beam.models.DocumentModel;
 import com.moutamid.beam.utilis.FileUtils;
 
 import java.util.ArrayList;
 
-public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentVh> {
+public class DocumentsLinkAdapter extends RecyclerView.Adapter<DocumentsLinkAdapter.DocumentVh> {
 
     public interface ClickListener {
-        void onClick(int pos);
+        void onClick(String link, String filename);
     }
 
     Context context;
-    ArrayList<DocumentModel> list;
+    ArrayList<DocumentLinkModel> list;
     ClickListener clickListener;
 
-    public DocumentsAdapter(Context context, ArrayList<DocumentModel> list, ClickListener clickListener) {
+    public DocumentsLinkAdapter(Context context, ArrayList<DocumentLinkModel> list, ClickListener clickListener) {
         this.context = context;
         this.list = list;
         this.clickListener = clickListener;
@@ -41,20 +42,18 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     @Override
     public void onBindViewHolder(@NonNull DocumentVh holder, int position) {
-        DocumentModel model = list.get(holder.getAbsoluteAdapterPosition());
+        DocumentLinkModel model = list.get(holder.getAbsoluteAdapterPosition());
         if (model.isDoc) {
             holder.image.setVisibility(View.GONE);
             holder.name.setVisibility(View.VISIBLE);
-            String fileName = FileUtils.getFileName(context, model.uri);
-            String fileExtension = FileUtils.getFileExtension(fileName);
-            holder.name.setText(fileName);
+            holder.name.setText(model.name);
         } else {
             holder.image.setVisibility(View.VISIBLE);
             holder.name.setVisibility(View.GONE);
-            Glide.with(context).load(model.uri).placeholder(R.color.white).into(holder.image);
+            Glide.with(context).load(model.link).placeholder(R.color.white).into(holder.image);
         }
 
-        holder.itemView.setOnClickListener(v -> clickListener.onClick(holder.getAbsoluteAdapterPosition()));
+        holder.itemView.setOnClickListener(v -> clickListener.onClick(model.link, model.name));
     }
 
     @Override

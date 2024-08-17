@@ -11,4 +11,18 @@ public class RequestModel {
     public RequestModel() {
     }
 
+    @Override
+    public String toString() {
+        return "RequestModel{" +
+                "ID='" + ID + '\'' +
+                ", userID='" + userID + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", category='" + category + '\'' +
+                ", timestamp=" + timestamp +
+                ", deadline=" + deadline +
+                ", mandatory=" + mandatory +
+                ", documents=" + documents +
+                '}';
+    }
 }

@@ -14,24 +14,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.fxn.stash.Stash;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.storage.OnProgressListener;
@@ -91,6 +87,16 @@ public class NewRequestActivity extends AppCompatActivity {
         binding.toolbar.refresh.setVisibility(View.VISIBLE);
         binding.toolbar.title.setText("New Request");
 
+        binding.toolbar.refresh.setOnClickListener(v -> {
+            binding.name.getEditText().setText("");
+            binding.category.getEditText().setText("");
+            binding.description.setText("");
+            Intent intent = getIntent();
+            finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            startActivity(intent);
+        });
+
         ArrayList<UserModel> usersList = new ArrayList<>();
 
         String[] service_categories = getResources().getStringArray(R.array.service_categories);
@@ -120,7 +126,9 @@ public class NewRequestActivity extends AppCompatActivity {
                     binding.noContact.setVisibility(View.GONE);
                     binding.contactRC.setVisibility(View.VISIBLE);
                 }
-                ContactsAdapter adapter = new ContactsAdapter(NewRequestActivity.this, usersList);
+                ContactsAdapter adapter = new ContactsAdapter(NewRequestActivity.this, usersList,
+                        userID -> startActivity(new Intent(this, UserProfileActivity.class).putExtra("USER_ID", userID))
+                );
                 binding.contactRC.setAdapter(adapter);
             });
 
@@ -245,17 +253,17 @@ public class NewRequestActivity extends AppCompatActivity {
     }
 
     private boolean valid() {
-        if (binding.category.getEditText().getText().toString().isEmpty()){
+        if (binding.category.getEditText().getText().toString().isEmpty()) {
             binding.category.getEditText().setError("required*");
             binding.category.getEditText().requestFocus();
             return false;
         }
-        if (binding.name.getEditText().getText().toString().isEmpty()){
+        if (binding.name.getEditText().getText().toString().isEmpty()) {
             binding.name.getEditText().setError("required*");
             binding.name.getEditText().requestFocus();
             return false;
         }
-        if (binding.description.getText().toString().isEmpty()){
+        if (binding.description.getText().toString().isEmpty()) {
             binding.description.setError("required*");
             binding.description.requestFocus();
             return false;
@@ -368,6 +376,8 @@ public class NewRequestActivity extends AppCompatActivity {
 
     }
 
+    DocumentsAdapter documentsAdapter;
+
     private void updateView() {
         if (newRequest.mandatory != null) {
             CategoryAdapter adapter = new CategoryAdapter(this, newRequest.mandatory, null);
@@ -382,7 +392,26 @@ public class NewRequestActivity extends AppCompatActivity {
             binding.noDocument.setVisibility(View.GONE);
         }
 
-        DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, list);
+        documentsAdapter = new DocumentsAdapter(this, list, pos -> {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("Remove Attachment")
+                    .setMessage("Are you sure you want to remove this attachment?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        dialog.dismiss();
+                        list.remove(pos);
+                        documentsAdapter.notifyItemRemoved(pos);
+
+                        if (list.isEmpty()) {
+                            binding.documentsRC.setVisibility(View.GONE);
+                            binding.noDocument.setVisibility(View.VISIBLE);
+                        } else {
+                            binding.documentsRC.setVisibility(View.VISIBLE);
+                            binding.noDocument.setVisibility(View.GONE);
+                        }
+
+                    }).setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                    .show();
+        });
         binding.documentsRC.setAdapter(documentsAdapter);
     }
 

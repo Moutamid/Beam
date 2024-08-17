@@ -25,9 +25,17 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     Context context;
     ArrayList<UserModel> list;
     UserModel currentUser;
-    public ContactsAdapter(Context context, ArrayList<UserModel> list) {
+
+    public interface ContactListener {
+        void onClick(String userID);
+    }
+
+    ContactListener listener;
+
+    public ContactsAdapter(Context context, ArrayList<UserModel> list, ContactListener listener) {
         this.context = context;
         this.list = list;
+        this.listener = listener;
         currentUser = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
     }
 
@@ -57,7 +65,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         }
 
         holder.itemView.setOnClickListener(v -> {
-            context.startActivity(new Intent(context, UserProfileActivity.class).putExtra("USER_ID", userModel.id));
+            listener.onClick(userModel.id);
         });
     }
 
