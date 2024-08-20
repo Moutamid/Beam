@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.moutamid.beam.R;
 import com.moutamid.beam.activities.RequestPreviewActivity;
+import com.moutamid.beam.activities.UserProfileActivity;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
@@ -97,6 +98,10 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
                 if (hasNonDoc) holder.containImage.setVisibility(View.VISIBLE);
             }
         }
+
+        holder.image.setOnClickListener(v-> {
+            context.startActivity(new Intent(context, UserProfileActivity.class).putExtra("USER_ID", requestModel.userID));
+        });
 
         holder.itemView.setOnClickListener(v -> {
             Stash.put(Constants.PASS_REQUEST, requestModel);

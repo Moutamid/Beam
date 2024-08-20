@@ -107,6 +107,7 @@ public class RequestResponseActivity extends AppCompatActivity {
                 .get().addOnSuccessListener(dataSnapshot -> {
                     if (dataSnapshot.exists()) {
                         UserModel userModel = dataSnapshot.getValue(UserModel.class);
+                        binding.name.setText(userModel.name);
                         Glide.with(RequestResponseActivity.this).load(userModel.image).placeholder(R.drawable.profile_icon).into(binding.image);
                         if (userModel.rating != null) {
                             float rating = 0;
