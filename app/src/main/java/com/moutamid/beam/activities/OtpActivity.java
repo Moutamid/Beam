@@ -6,19 +6,12 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.fxn.stash.Stash;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseTooManyRequestsException;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthMissingActivityForRecaptchaException;
 import com.google.firebase.auth.FirebaseUser;
@@ -26,7 +19,6 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.moutamid.beam.MainActivity;
-import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivityOtpBinding;
 import com.moutamid.beam.models.LocationModel;
 import com.moutamid.beam.models.UserModel;
@@ -41,6 +33,7 @@ public class OtpActivity extends AppCompatActivity {
     UserModel userModel;
     String verificationId;
     private static final String TAG = "OtpActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,8 +54,10 @@ public class OtpActivity extends AppCompatActivity {
         });
 
         binding.create.setOnClickListener(v -> {
-            Constants.showDialog();
-            verifyCode();
+            if (!binding.otp.getEditText().getText().toString().isEmpty() && verificationId != null) {
+                Constants.showDialog();
+                verifyCode();
+            }
         });
 
     }
@@ -81,12 +76,25 @@ public class OtpActivity extends AppCompatActivity {
                             userModel.id = user.getUid();
                             userModel.image = "";
                             userModel.location = new LocationModel();
-                            Constants.databaseReference().child(Constants.USER).child(userModel.id).setValue(userModel)
-                                    .addOnSuccessListener(unused -> {
-                                        Stash.put(Constants.STASH_USER, userModel);
-                                        Constants.dismissDialog();
-                                        startActivity(new Intent(OtpActivity.this, MainActivity.class));
-                                        finish();
+
+                            Constants.databaseReference().child(Constants.USER).child(user.getUid()).get()
+                                    .addOnSuccessListener(dataSnapshot -> {
+                                        if (dataSnapshot.exists()) {
+                                            Constants.auth().signOut();
+                                            getOnBackPressedDispatcher().onBackPressed();
+                                            Toast.makeText(this, "User Already Exist", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Constants.databaseReference().child(Constants.USER).child(userModel.id).setValue(userModel)
+                                                    .addOnSuccessListener(unused -> {
+                                                        Stash.put(Constants.STASH_USER, userModel);
+                                                        Constants.dismissDialog();
+                                                        startActivity(new Intent(OtpActivity.this, MainActivity.class));
+                                                        finish();
+                                                    }).addOnFailureListener(e -> {
+                                                        Constants.dismissDialog();
+                                                        Toast.makeText(OtpActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                                    });
+                                        }
                                     }).addOnFailureListener(e -> {
                                         Constants.dismissDialog();
                                         Toast.makeText(OtpActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
@@ -152,7 +160,7 @@ public class OtpActivity extends AppCompatActivity {
         public void onVerificationCompleted(@NonNull PhoneAuthCredential c) {
             final String code = c.getSmsCode();
             Log.d(TAG, "onVerificationCompleted: ");
-            if (code!=null) {
+            if (code != null) {
                 binding.otp.getEditText().setText(code);
             }
         }

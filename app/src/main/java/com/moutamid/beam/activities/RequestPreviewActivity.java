@@ -304,8 +304,7 @@ public class RequestPreviewActivity extends AppCompatActivity {
             }
             ContactsAdapter adapter = new ContactsAdapter(RequestPreviewActivity.this, usersList, userID -> {
                 showData(userID);
-            }
-            );
+            });
             binding.contactRC.setAdapter(adapter);
         }
     }
@@ -315,7 +314,6 @@ public class RequestPreviewActivity extends AppCompatActivity {
     private void showData(String userID) {
         binding.replyLayout.setVisibility(View.VISIBLE);
         RequestModel model = requestList.stream().filter(requestModel1 -> requestModel1.userID.equals(userID)).findFirst().get();
-        Log.d(TAG, "showData: " + model.toString());
 
         binding.replyTitle.setText(model.title);
         binding.replyDescription.setText(model.description);
@@ -335,7 +333,7 @@ public class RequestPreviewActivity extends AppCompatActivity {
             binding.documentsRC.setAdapter(documentsAdapter);
         }
 
-        if (requestModel.mandatory != null) {
+        if (model.mandatory != null) {
             CategoryAdapter categoryAdapter = new CategoryAdapter(this, model.mandatory, null);
             binding.madatoryItemsReply.setAdapter(categoryAdapter);
         }

@@ -189,6 +189,14 @@ public class MainActivity extends AppCompatActivity {
             if (adapter != null) {
                 if (query.equals("All")) adapter.getFilter().filter("");
                 else adapter.getFilter().filter(query);
+
+                if (adapter.getItemCount() == 0) {
+                    binding.noLayout.setVisibility(View.VISIBLE);
+                    binding.recycler.setVisibility(View.GONE);
+                } else {
+                    binding.noLayout.setVisibility(View.GONE);
+                    binding.recycler.setVisibility(View.VISIBLE);
+                }
             }
         });
         binding.categoryRC.setAdapter(categoryAdapter);
