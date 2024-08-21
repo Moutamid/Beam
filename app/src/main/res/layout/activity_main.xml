@@ -24,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/home_items"
+        android:layout_above="@id/micLayout"
         android:layout_below="@id/categoryRC" />
 
     <LinearLayout

@@ -103,7 +103,11 @@ public class UserProfileActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel)).commit();
         });
 
-        binding.attachRating.setOnClickListener(v -> showRatingDialog());
+        binding.attachRating.setOnClickListener(v -> {
+            if (userID.equals(Constants.auth().getCurrentUser().getUid())) {
+                Toast.makeText(this, "You cant rate yourself", Toast.LENGTH_SHORT).show();
+            } else showRatingDialog();
+        });
 
     }
 
