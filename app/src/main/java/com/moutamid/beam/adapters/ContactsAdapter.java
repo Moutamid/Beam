@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.fxn.stash.Stash;
+import com.moutamid.beam.utilis.Stash;
 import com.moutamid.beam.R;
 import com.moutamid.beam.activities.UserProfileActivity;
 import com.moutamid.beam.models.UserModel;

@@ -8,7 +8,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.fxn.stash.Stash;
+import com.moutamid.beam.utilis.Stash;
 import com.moutamid.beam.utilis.Constants;
 
 import java.util.HashMap;

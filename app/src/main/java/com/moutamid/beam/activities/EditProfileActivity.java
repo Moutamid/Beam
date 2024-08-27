@@ -10,12 +10,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
-import com.fxn.stash.Stash;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivityEditProfileBinding;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.Stash;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

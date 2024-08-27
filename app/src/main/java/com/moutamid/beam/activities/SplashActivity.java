@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.moutamid.beam.MainActivity;
 import com.moutamid.beam.R;
+import com.moutamid.beam.TestActivity;
 import com.moutamid.beam.utilis.Constants;
 
 public class SplashActivity extends AppCompatActivity {
@@ -35,7 +36,7 @@ public class SplashActivity extends AppCompatActivity {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 finish();
             } else {
-                startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
+                startActivity(new Intent(SplashActivity.this, TestActivity.class));
                 finish();
             }
         }, 2000);

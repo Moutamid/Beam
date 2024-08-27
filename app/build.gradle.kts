@@ -38,7 +38,8 @@ android {
 dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
-    implementation(libs.stash)
+  //  implementation(libs.stash)
+    implementation(libs.gson)
     implementation(libs.glide)
     implementation(libs.volley)
     implementation(libs.ccp)

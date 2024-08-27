@@ -11,7 +11,7 @@ import android.widget.ArrayAdapter;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.fxn.stash.Stash;
+import com.moutamid.beam.utilis.Stash;
 import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivitySignupBinding;
 import com.moutamid.beam.models.UserModel;

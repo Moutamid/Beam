@@ -17,7 +17,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.fxn.stash.Stash;
+import com.moutamid.beam.utilis.Stash;
 import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivityLoginBinding;
 import com.moutamid.beam.models.UserModel;

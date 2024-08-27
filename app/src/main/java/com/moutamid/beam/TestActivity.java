@@ -45,13 +45,13 @@ public class TestActivity extends AppCompatActivity {
         binding = ActivityTestBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-      //  mContext = this;
+        mContext = this;
 
-//        setListeners();
-//        checkPermissions();
-//        resetSpeechRecognizer();
-//        setRecogniserIntent();
-//        prepareLocales();
+        setListeners();
+        checkPermissions();
+        resetSpeechRecognizer();
+        setRecogniserIntent();
+        prepareLocales();
 
     }
 
@@ -82,7 +82,7 @@ public class TestActivity extends AppCompatActivity {
         if (SpeechRecognizer.isRecognitionAvailable(mContext)) {
             speechRecognizer.setRecognitionListener(mRecognitionListener);
         } else {
-            finish();
+            Toast.makeText(mContext, "Speech Recognizer is not available", Toast.LENGTH_SHORT).show();
         }
     }
 
