@@ -1,11 +1,16 @@
 package com.moutamid.beam.activities;
 
+import android.Manifest;
+import android.animation.AnimatorSet;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +22,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
-import com.moutamid.beam.utilis.Stash;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -37,6 +42,12 @@ import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.notification.FcmNotificationsSender;
 import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.FileUtils;
+import com.moutamid.beam.utilis.MicAnimation;
+import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
+import com.moutamid.beam.utilis.Stash;
+
+import net.gotev.speech.Speech;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,6 +57,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 public class RequestResponseActivity extends AppCompatActivity {
+    private static final String TAG = "RequestResponseActivity";
     ActivityRequestResponseBinding binding;
     private static final int PICK_FROM_CAMERA = 1001;
     private static final int PICK_FROM_GALLERY = 1002;
@@ -57,6 +69,50 @@ public class RequestResponseActivity extends AppCompatActivity {
     final Calendar calendar = Calendar.getInstance();
     RequestModel requestModel;
     UserModel stash;
+
+    AnimatorSet listeningAnimation;
+    private SpeechRecognitionManager speechRecognitionManager;
+    SpeechUtils speechUtils = new SpeechUtils() {
+        @Override
+        public void onResult(String result) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Log.d(TAG, "onResult: " + result);
+            if (result.toLowerCase(Locale.ROOT).contains("go back")) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else if (result.toLowerCase(Locale.ROOT).contains("refresh")) {
+                refresh();
+            } else if (result.toLowerCase(Locale.ROOT).contains("attach document")) {
+                attachDocument();
+            } else if (result.toLowerCase(Locale.ROOT).contains("attach image") || result.toLowerCase(Locale.ROOT).contains("open gallery")) {
+                attachImage();
+            } else if (result.toLowerCase(Locale.ROOT).contains("attach image from camera") || result.toLowerCase(Locale.ROOT).contains("open camera")) {
+                attachCamera();
+            } else if (result.toLowerCase(Locale.ROOT).contains("select deadline") || result.toLowerCase(Locale.ROOT).contains("open deadline")) {
+                selectDeadline();
+            } else if (result.toLowerCase(Locale.ROOT).contains("create request") || result.toLowerCase(Locale.ROOT).contains("send request")) {
+                send();
+            } else {
+                if (binding.tit.getEditText().hasFocus()) {
+                    binding.tit.getEditText().setText(result.replace(" ", "").replace("-", ""));
+                }
+                if (binding.description.hasFocus()) {
+                    binding.description.setText(result.replace(" ", "").replace("-", ""));
+                }
+            }
+        }
+
+        @Override
+        public void onError(String error) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Toast.makeText(RequestResponseActivity.this, error, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,24 +139,24 @@ public class RequestResponseActivity extends AppCompatActivity {
         Glide.with(RequestResponseActivity.this).load(stash.image).placeholder(R.drawable.profile_icon).into(binding.profileImage);
 
         binding.toolbar.refresh.setOnClickListener(v -> {
-            binding.tit.getEditText().setText("");
-            binding.description.setText("");
-            Intent intent = getIntent();
-            finish();
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            startActivity(intent);
+            refresh();
         });
 
-        DatePickerDialog.OnDateSetListener date = (datePicker, year, month, day) -> {
-            calendar.set(Calendar.YEAR, year);
-            calendar.set(Calendar.MONTH, month);
-            calendar.set(Calendar.DAY_OF_MONTH, day);
-            newRequest.deadline = calendar.getTime().getTime();
-            binding.deadline.setText("Deadline : " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
-        };
-
         binding.calender.setOnClickListener(v -> {
-            new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+            selectDeadline();
+        });
+
+        binding.pause.setOnClickListener(v -> {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+        });
+        binding.stop.setOnClickListener(v -> {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
         });
 
         Constants.databaseReference().child(Constants.USER).child(requestModel.userID)
@@ -135,44 +191,96 @@ public class RequestResponseActivity extends AppCompatActivity {
         }
 
         binding.mandatory.setOnClickListener(v -> {
-            addMandotory();
+            addMandatory();
         });
 
-        binding.attachCamera.setOnClickListener(v -> {
-            ImagePicker.with(this)
-                    .crop()
-                    .cameraOnly()
-                    .compress(1024)
-                    .maxResultSize(1080, 1080)
-                    .start(PICK_FROM_CAMERA);
-        });
-
-        binding.attachImage.setOnClickListener(v -> {
-            ImagePicker.with(this)
-                    .crop()
-                    .galleryOnly()
-                    .compress(1024)
-                    .maxResultSize(1080, 1080)
-                    .start(PICK_FROM_GALLERY);
-        });
-
-        binding.attachDocument.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
-            startActivityForResult(intent, PICK_DOCUMENT);
-        });
-
-        binding.send.setOnClickListener(v -> {
-            if (valid()) {
-                if (list.isEmpty()) {
-                    uploadModel();
-                } else {
-                    uploadDocuments(0);
-                }
+        binding.mic.listen.setOnClickListener(v -> {
+            if (listeningAnimation == null || !listeningAnimation.isRunning()) {
+                listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                speechRecognitionManager.startListening();
+            } else {
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+                listeningAnimation = null;
+                speechRecognitionManager.stopListening();
             }
         });
 
+        binding.attachCamera.setOnClickListener(v -> {
+            attachCamera();
+        });
+
+        binding.attachImage.setOnClickListener(v -> {
+            attachImage();
+        });
+
+        binding.attachDocument.setOnClickListener(v -> {
+            attachDocument();
+        });
+
+        binding.send.setOnClickListener(v -> {
+            send();
+        });
+
+        binding.send.setOnClickListener(v -> {
+            send();
+        });
+
+    }
+
+    private void selectDeadline() {
+        DatePickerDialog.OnDateSetListener date = (datePicker, year, month, day) -> {
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, month);
+            calendar.set(Calendar.DAY_OF_MONTH, day);
+            newRequest.deadline = calendar.getTime().getTime();
+            binding.deadline.setText("Deadline : " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+        };
+
+        new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void attachCamera() {
+        ImagePicker.with(this)
+                .crop()
+                .cameraOnly()
+                .compress(1024)
+                .maxResultSize(1080, 1080)
+                .start(PICK_FROM_CAMERA);
+    }
+
+    private void attachImage() {
+        ImagePicker.with(this)
+                .crop()
+                .galleryOnly()
+                .compress(1024)
+                .maxResultSize(1080, 1080)
+                .start(PICK_FROM_GALLERY);
+    }
+
+    private void attachDocument() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, PICK_DOCUMENT);
+    }
+
+    private void send() {
+        if (valid()) {
+            if (list.isEmpty()) {
+                uploadModel();
+            } else {
+                uploadDocuments(0);
+            }
+        }
+    }
+
+    private void refresh() {
+        binding.tit.getEditText().setText("");
+        binding.description.setText("");
+        Intent intent = getIntent();
+        finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        startActivity(intent);
     }
 
     private void uploadDocuments(int i) {
@@ -243,7 +351,7 @@ public class RequestResponseActivity extends AppCompatActivity {
         return true;
     }
 
-    private void addMandotory() {
+    private void addMandatory() {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.add_mandatory);
@@ -334,6 +442,16 @@ public class RequestResponseActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Constants.initDialog(this);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            new Handler().postDelayed(() -> {
+                runOnUiThread(() -> {
+                    Speech.init(this, getPackageName());
+                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                    speechRecognitionManager.startListening();
+                });
+            }, 1000);
+        }
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -26,11 +27,15 @@ import com.moutamid.beam.databinding.ActivityWelcomeBinding;
 import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.MicAnimation;
 import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
+
+import net.gotev.speech.Speech;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class WelcomeActivity extends AppCompatActivity {
     ActivityWelcomeBinding binding;
@@ -61,154 +66,17 @@ public class WelcomeActivity extends AppCompatActivity {
             }
         }
 
-        listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
-
-        speechRecognitionManager = new SpeechRecognitionManager(this, new RecognitionListener() {
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-
-            }
-
-            @Override
-            public void onBeginningOfSpeech() {
-
-            }
-
-            @Override
-            public void onRmsChanged(float rmsdB) {
-
-            }
-
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-
-            }
-
-            @Override
-            public void onError(int error) {
-
-            }
-
-            @Override
-            public void onResults(Bundle results) {
-
-            }
-
-            @Override
-            public void onPartialResults(Bundle partialResults) {
-
-            }
-
-            @Override
-            public void onEvent(int eventType, Bundle params) {
-
-            }
-        });
-
-//        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-//        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-//                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-//        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-//                "com.moutamid.beam");
-//
-//        SpeechRecognizer recognizer = SpeechRecognizer
-//                .createSpeechRecognizer(this.getApplicationContext());
-//
-//        RecognitionListener listener = new RecognitionListener() {
-//            @Override
-//            public void onResults(Bundle results) {
-//                ArrayList<String> voiceResults = results
-//                        .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-//                if (voiceResults == null) {
-//                    System.out.println("No voice results");
-//                } else {
-//                    System.out.println("Printing matches: ");
-//                    for (String match : voiceResults) {
-//                        System.out.println(match);
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onReadyForSpeech(Bundle params) {
-//                System.out.println("Ready for speech");
-//            }
-//
-//            /**
-//             *  ERROR_NETWORK_TIMEOUT = 1;
-//             *  ERROR_NETWORK = 2;
-//             *  ERROR_AUDIO = 3;
-//             *  ERROR_SERVER = 4;
-//             *  ERROR_CLIENT = 5;
-//             *  ERROR_SPEECH_TIMEOUT = 6;
-//             *  ERROR_NO_MATCH = 7;
-//             *  ERROR_RECOGNIZER_BUSY = 8;
-//             *  ERROR_INSUFFICIENT_PERMISSIONS = 9;
-//             *
-//             * @param error code is defined in SpeechRecognizer
-//             */
-//            @Override
-//            public void onError(int error) {
-//                System.err.println("Error listening for speech: " + error);
-//            }
-//
-//            @Override
-//            public void onBeginningOfSpeech() {
-//                System.out.println("Speech starting");
-//            }
-//
-//            @Override
-//            public void onBufferReceived(byte[] buffer) {
-//                // TODO Auto-generated method stub
-//            }
-//
-//            @Override
-//            public void onEndOfSpeech() {
-//                // TODO Auto-generated method stub
-//
-//            }
-//
-//            @Override
-//            public void onEvent(int eventType, Bundle params) {
-//                // TODO Auto-generated method stub
-//
-//            }
-//
-//            @Override
-//            public void onPartialResults(Bundle partialResults) {
-//                // TODO Auto-generated method stub
-//
-//            }
-//
-//            @Override
-//            public void onRmsChanged(float rmsdB) {
-//                // TODO Auto-generated method stub
-//
-//            }
-//        };
-//        recognizer.setRecognitionListener(listener);
-    //    recognizer.startListening(intent);
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
-            speechRecognitionManager.startListening();
-
         binding.mic.listen.setOnClickListener(v -> {
             if (listeningAnimation == null || !listeningAnimation.isRunning()) {
                 listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                Speech.init(this, getPackageName());
                 speechRecognitionManager.startListening();
                 Log.d(TAG, "onCreate: START");
-//                recognizer.startListening(intent);
             } else {
                 MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
                 listeningAnimation = null;
                 speechRecognitionManager.stopListening();
                 Log.d(TAG, "onCreate: END");
-//                recognizer.stopListening();
             }
         });
 
@@ -221,6 +89,66 @@ public class WelcomeActivity extends AppCompatActivity {
             startActivity(new Intent(this, SignupActivity.class));
             finish();
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            new Handler().postDelayed(() -> {
+                runOnUiThread(() -> {
+                    Speech.init(this, getPackageName());
+                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                    speechRecognitionManager.startListening();
+                });
+            }, 1000);
+        }
+    }
+
+    SpeechUtils speechUtils = new SpeechUtils() {
+        @Override
+        public void onResult(String result) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Log.d(TAG, "onResult: " + result);
+            if (result.toLowerCase(Locale.ROOT).contains("login")) {
+                startActivity(new Intent(WelcomeActivity.this, LoginActivity.class));
+                finish();
+            } else if (result.toLowerCase(Locale.ROOT).contains("signup") || result.toLowerCase(Locale.ROOT).contains("sign up")) {
+                startActivity(new Intent(WelcomeActivity.this, SignupActivity.class));
+                finish();
+            } else if (result.toLowerCase(Locale.ROOT).contains("google")) {
+                signInGoogle();
+            } else if (result.toLowerCase(Locale.ROOT).contains("facebook")) {
+                signInFacebook();
+            } else if (result.toLowerCase(Locale.ROOT).contains("linkedIn")) {
+                signInLinkedIn();
+            }
+        }
+
+        @Override
+        public void onError(String error) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Toast.makeText(WelcomeActivity.this, error, Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private void signInLinkedIn() {
+
+    }
+
+    private void signInGoogle() {
+
+    }
+
+    private void signInFacebook() {
+
     }
 
     @Override
@@ -252,16 +180,6 @@ public class WelcomeActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Permission for recording audio was denied", Toast.LENGTH_SHORT).show();
             }
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SpeechRecognitionManager.REQUEST_CODE) {
-            ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            String spokenText = result.get(0);
-            Log.d(TAG, "onActivityResult: " + spokenText);
         }
     }
 }

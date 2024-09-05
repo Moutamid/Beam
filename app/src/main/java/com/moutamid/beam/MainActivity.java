@@ -1,11 +1,13 @@
 package com.moutamid.beam;
 
 import android.Manifest;
+import android.animation.AnimatorSet;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +20,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.moutamid.beam.utilis.Stash;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -36,10 +37,17 @@ import com.moutamid.beam.models.LocationModel;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.MicAnimation;
+import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
+import com.moutamid.beam.utilis.Stash;
+
+import net.gotev.speech.Speech;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -51,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     ArrayList<RequestModel> list;
     RequestsAdapter adapter;
+
+    AnimatorSet listeningAnimation;
+    private SpeechRecognitionManager speechRecognitionManager;
 
     private void requestMissingPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -222,26 +233,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.toolbar.search.setOnClickListener(v -> {
-            binding.toolbar.nameLayout.setVisibility(View.GONE);
-            binding.toolbar.search.setVisibility(View.GONE);
-            binding.toolbar.newResponse.setVisibility(View.GONE);
-            binding.toolbar.searchLayout.setVisibility(View.VISIBLE);
-            isSearchEnable = true;
+            showSearchLayout();
         });
 
         binding.toolbar.back.setOnClickListener(v -> {
-            binding.toolbar.nameLayout.setVisibility(View.VISIBLE);
-            binding.toolbar.search.setVisibility(View.VISIBLE);
-            binding.toolbar.newResponse.setVisibility(View.VISIBLE);
-            binding.toolbar.searchLayout.setVisibility(View.GONE);
-            isSearchEnable = false;
-
-            adapter.getFilter().filter("");
+            hideSearchLayout();
         });
 
         binding.toolbar.searchBtn.setOnClickListener(v -> {
-            String query = binding.toolbar.searchEt.getEditText().getText().toString().trim();
-            adapter.getFilter().filter(query);
+            filterItem();
         });
 
         binding.toolbar.more.setOnClickListener(v -> {
@@ -272,12 +272,104 @@ public class MainActivity extends AppCompatActivity {
 
         binding.recycler.setLayoutManager(new LinearLayoutManager(this));
         binding.recycler.setHasFixedSize(false);
+
+        binding.mic.listen.setOnClickListener(v -> {
+            if (listeningAnimation == null || !listeningAnimation.isRunning()) {
+                listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                speechRecognitionManager.startListening();
+            } else {
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+                listeningAnimation = null;
+                speechRecognitionManager.stopListening();
+            }
+        });
+
+    }
+
+    private void hideSearchLayout() {
+        binding.toolbar.nameLayout.setVisibility(View.VISIBLE);
+        binding.toolbar.search.setVisibility(View.VISIBLE);
+        binding.toolbar.newResponse.setVisibility(View.VISIBLE);
+        binding.toolbar.searchLayout.setVisibility(View.GONE);
+        isSearchEnable = false;
+
+        adapter.getFilter().filter("");
+    }
+
+    SpeechUtils speechUtils = new SpeechUtils() {
+        @Override
+        public void onResult(String result) {
+            Log.d(TAG, "onResult: " + result);
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            if (result.toLowerCase(Locale.ROOT).contains("close app") || result.toLowerCase(Locale.ROOT).contains("close the app") ||
+                    result.toLowerCase(Locale.ROOT).contains("close this app") ||
+                    result.toLowerCase(Locale.ROOT).contains("go back")) {
+                if (isSearchEnable) {
+                    hideSearchLayout();
+                } else {
+                    MainActivity.this.finish();
+                }
+            } else if (result.toLowerCase(Locale.ROOT).contains("more") || result.toLowerCase(Locale.ROOT).contains("settings")) {
+                startActivity(new Intent(MainActivity.this, SettingActivity.class));
+            } else if (result.toLowerCase(Locale.ROOT).contains("search")) {
+                if (!isSearchEnable) {
+                    showSearchLayout();
+                } else {
+                    filterItem();
+                }
+            } else if (result.toLowerCase(Locale.ROOT).contains("new") || result.toLowerCase(Locale.ROOT).contains("add new")
+                    || result.toLowerCase(Locale.ROOT).contains("add") || result.toLowerCase(Locale.ROOT).contains("create new")
+                    || result.toLowerCase(Locale.ROOT).contains("new request")) {
+                startActivity(new Intent(MainActivity.this, NewRequestActivity.class));
+            } else {
+                if (isSearchEnable) {
+                    binding.toolbar.searchEt.getEditText().setText(result);
+                }
+            }
+        }
+
+        @Override
+        public void onError(String error) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private void filterItem() {
+        String query = binding.toolbar.searchEt.getEditText().getText().toString().trim();
+        adapter.getFilter().filter(query);
+    }
+
+    private void showSearchLayout() {
+        binding.toolbar.nameLayout.setVisibility(View.GONE);
+        binding.toolbar.search.setVisibility(View.GONE);
+        binding.toolbar.newResponse.setVisibility(View.GONE);
+        binding.toolbar.searchLayout.setVisibility(View.VISIBLE);
+        isSearchEnable = true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Constants.initDialog(this);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            new Handler().postDelayed(() -> {
+                runOnUiThread(() -> {
+                    Speech.init(this, getPackageName());
+                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                    speechRecognitionManager.startListening();
+                });
+            }, 1000);
+        }
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);

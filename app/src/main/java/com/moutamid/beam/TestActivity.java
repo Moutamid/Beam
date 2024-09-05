@@ -1,11 +1,5 @@
 package com.moutamid.beam;
 
-import static com.moutamid.beam.utilis.SpeechUtils.IS_CONTINUES_LISTEN;
-import static com.moutamid.beam.utilis.SpeechUtils.PERMISSIONS_REQUEST_RECORD_AUDIO;
-import static com.moutamid.beam.utilis.SpeechUtils.RESULTS_LIMIT;
-import static com.moutamid.beam.utilis.SpeechUtils.errorLog;
-import static com.moutamid.beam.utilis.SpeechUtils.getErrorText;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,6 +7,7 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,16 +23,19 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.moutamid.beam.databinding.ActivityTestBinding;
 
+import net.gotev.speech.GoogleVoiceTypingDisabledException;
+import net.gotev.speech.Speech;
+import net.gotev.speech.SpeechDelegate;
+import net.gotev.speech.SpeechRecognitionNotAvailable;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class TestActivity extends AppCompatActivity {
     ActivityTestBinding binding;
-    private Context mContext;
-    private SpeechRecognizer speechRecognizer;
-    private Intent recognizerIntent;
-
-    private String selectedLanguage = "en"; // Default "en" selected
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,23 +43,65 @@ public class TestActivity extends AppCompatActivity {
         binding = ActivityTestBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        mContext = this;
+//        startListening();
 
-        setListeners();
         checkPermissions();
-        resetSpeechRecognizer();
-        setRecogniserIntent();
-        prepareLocales();
+
+        Speech.init(this, getPackageName());
+
+        binding.btnStartListen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Speech.getInstance().startListening(new SpeechDelegate() {
+                        @Override
+                        public void onStartOfSpeech() {
+                            Log.i("speech", "speech recognition is now active");
+                        }
+
+                        @Override
+                        public void onSpeechRmsChanged(float value) {
+                            Log.d("speech", "rms is now: " + value);
+                        }
+
+                        @Override
+                        public void onSpeechPartialResults(List<String> results) {
+                            StringBuilder str = new StringBuilder();
+                            for (String res : results) {
+                                str.append(res).append(" ");
+                            }
+
+                            Log.i("speech", "partial result: " + str.toString().trim());
+                        }
+
+                        @Override
+                        public void onSpeechResult(String result) {
+                            Log.i("speech", "result: " + result);
+                        }
+                    });
+                } catch (SpeechRecognitionNotAvailable exc) {
+                    Toast.makeText(TestActivity.this, "Speech recognition is not available on this device!", Toast.LENGTH_SHORT).show();
+                    Log.e("speech", "Speech recognition is not available on this device!");
+                } catch (GoogleVoiceTypingDisabledException exc) {
+                    Toast.makeText(TestActivity.this, "Google voice typing must be enabled!", Toast.LENGTH_SHORT).show();
+                    Log.e("speech", "Google voice typing must be enabled!");
+                }
+            }
+        });
+
+
+//        mContext = this;
+
+//        setListeners();
+//        checkPermissions();
+//        resetSpeechRecognizer();
+//        setRecogniserIntent();
+//        prepareLocales();
 
     }
 
     private void setListeners() {
-        binding.btnStartListen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startListening();
-            }
-        });
+
     }
 
     private void checkPermissions() {
@@ -70,76 +110,83 @@ public class TestActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(
                     TestActivity.this,
                     new String[]{android.Manifest.permission.RECORD_AUDIO},
-                    PERMISSIONS_REQUEST_RECORD_AUDIO
+                    1001
             );
         }
     }
 
-    private void resetSpeechRecognizer() {
-        if (speechRecognizer != null) speechRecognizer.destroy();
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(mContext);
-        errorLog("isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(mContext));
-        if (SpeechRecognizer.isRecognitionAvailable(mContext)) {
-            speechRecognizer.setRecognitionListener(mRecognitionListener);
-        } else {
-            Toast.makeText(mContext, "Speech Recognizer is not available", Toast.LENGTH_SHORT).show();
-        }
-    }
+//    private void resetSpeechRecognizer() {
+//        if (speechRecognizer != null) speechRecognizer.destroy();
+//        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(mContext);
+//        errorLog("isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(mContext));
+//        if (SpeechRecognizer.isRecognitionAvailable(mContext)) {
+//            speechRecognizer.setRecognitionListener(mRecognitionListener);
+//        } else {
+//            Toast.makeText(mContext, "Speech Recognizer is not available", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
-    private void setRecogniserIntent() {
-        recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, selectedLanguage);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedLanguage);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, RESULTS_LIMIT);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startListening();
-            } else {
-                Toast.makeText(mContext, "Permission Denied!", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        }
-    }
-
-    private void startListening() {
-        speechRecognizer.startListening(recognizerIntent);
-        binding.progressBar1.setVisibility(View.VISIBLE);
-    }
+//    private void setRecogniserIntent() {
+//        recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+//        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, selectedLanguage);
+//        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, selectedLanguage);
+//        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+//        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, RESULTS_LIMIT);
+//    }
+//
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                startListening();
+//            } else {
+//                Toast.makeText(mContext, "Permission Denied!", Toast.LENGTH_SHORT).show();
+//                finish();
+//            }
+//        }
+//    }
+//
+//    private void startListening() {
+//        speechRecognizer.startListening(recognizerIntent);
+//        binding.progressBar1.setVisibility(View.VISIBLE);
+//    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        errorLog("resume");
-        resetSpeechRecognizer();
-        if (IS_CONTINUES_LISTEN) {
-            startListening();
-        }
+//        errorLog("resume");
+//       // resetSpeechRecognizer();
+//        if (IS_CONTINUES_LISTEN) {
+//            startListening();
+//        }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Speech.getInstance().shutdown();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        errorLog("pause");
-        if (speechRecognizer != null) {
-            speechRecognizer.stopListening();
-        }
+//        errorLog("pause");
+//        if (speechRecognizer != null) {
+//            speechRecognizer.stopListening();
+//        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        errorLog("stop");
-        if (speechRecognizer != null) {
-            speechRecognizer.destroy();
-        }
+//        errorLog("stop");
+//        if (speechRecognizer != null) {
+//            speechRecognizer.destroy();
+//        }
     }
-
+/*
     private void prepareLocales() {
         final Locale[] availableLocales = Locale.getAvailableLocales();
         ArrayAdapter<Object> adapterLocalization = new ArrayAdapter<>(
@@ -235,6 +282,6 @@ public class TestActivity extends AppCompatActivity {
         public void onEvent(int eventType, Bundle params) {
             errorLog("onEvent");
         }
-    };
+    };*/
 
 }

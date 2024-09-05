@@ -1,31 +1,73 @@
 package com.moutamid.beam.activities;
 
+import android.Manifest;
 import android.animation.AnimatorSet;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.speech.RecognitionListener;
-import android.speech.SpeechRecognizer;
-import android.util.Log;
+import android.os.Handler;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
-import com.moutamid.beam.utilis.Stash;
 import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivitySignupBinding;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.MicAnimation;
 import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
+import com.moutamid.beam.utilis.Stash;
 
-import java.util.List;
+import net.gotev.speech.Speech;
+
+import java.util.Locale;
 
 public class SignupActivity extends AppCompatActivity {
     ActivitySignupBinding binding;
     AnimatorSet listeningAnimation;
     private SpeechRecognitionManager speechRecognitionManager;
     private static final String TAG = "SignupActivity";
+
+    SpeechUtils speechUtils = new SpeechUtils() {
+        @Override
+        public void onResult(String result) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            if (result.toLowerCase(Locale.ROOT).contains("go back")) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else if (result.toLowerCase(Locale.ROOT).contains("create account")) {
+                create();
+            } else if (result.toLowerCase(Locale.ROOT).contains("select name")) {
+                binding.name.getEditText().requestFocus();
+            } else if (result.toLowerCase(Locale.ROOT).contains("select phone")) {
+                binding.phone.getEditText().requestFocus();
+            } else if (result.toLowerCase(Locale.ROOT).contains("write phone number")) {
+                binding.phone.getEditText().requestFocus();
+            } else {
+                if (binding.name.getEditText().hasFocus()) {
+                    binding.name.getEditText().setText(result);
+                }
+                if (binding.phone.getEditText().hasFocus()) {
+                    binding.phone.getEditText().setText(result.replace(" ", "").replace("-", ""));
+                }
+            }
+        }
+
+        @Override
+        public void onError(String error) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Toast.makeText(SignupActivity.this, error, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,55 +83,6 @@ public class SignupActivity extends AppCompatActivity {
         });
 
         binding.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-
-        listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
-
-        speechRecognitionManager = new SpeechRecognitionManager(this, new RecognitionListener() {
-            @Override
-            public void onResults(Bundle results) {
-                // Handle the speech recognition results
-                List<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                if (matches != null && !matches.isEmpty()) {
-                    String spokenText = matches.get(0);
-                    Log.d(TAG, "onResults: " + spokenText);
-                }
-            }
-
-            @Override
-            public void onError(int error) {
-                // Handle the error
-            }
-
-            @Override
-            public void onBeginningOfSpeech() {
-            }
-
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-            }
-
-            @Override
-            public void onRmsChanged(float rmsdB) {
-            }
-
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-            }
-
-            @Override
-            public void onPartialResults(Bundle partialResults) {
-            }
-
-            @Override
-            public void onEvent(int eventType, Bundle params) {
-            }
-        });
-
-        speechRecognitionManager.startListening();
 
         binding.mic.listen.setOnClickListener(v -> {
             if (listeningAnimation == null || !listeningAnimation.isRunning()) {
@@ -107,15 +100,19 @@ public class SignupActivity extends AppCompatActivity {
         binding.categoryList.setAdapter(subject);
 
         binding.create.setOnClickListener(v -> {
-            if (valid()) {
-                UserModel userModel = new UserModel();
-                userModel.name = binding.name.getEditText().getText().toString().trim();
-                userModel.category = binding.category.getEditText().getText().toString().trim();
-                userModel.phoneNumber = binding.ccp.getSelectedCountryCodeWithPlus() + binding.phone.getEditText().getText().toString().trim();
-                Stash.put(Constants.STASH_USER, userModel);
-                startActivity(new Intent(this, OtpActivity.class));
-            }
+            create();
         });
+    }
+
+    private void create() {
+        if (valid()) {
+            UserModel userModel = new UserModel();
+            userModel.name = binding.name.getEditText().getText().toString().trim();
+            userModel.category = binding.category.getEditText().getText().toString().trim();
+            userModel.phoneNumber = binding.ccp.getSelectedCountryCodeWithPlus() + binding.phone.getEditText().getText().toString().trim();
+            Stash.put(Constants.STASH_USER, userModel);
+            startActivity(new Intent(this, OtpActivity.class));
+        }
     }
 
     private boolean valid() {
@@ -137,6 +134,20 @@ public class SignupActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            new Handler().postDelayed(() -> {
+                runOnUiThread(() -> {
+                    Speech.init(this, getPackageName());
+                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                    speechRecognitionManager.startListening();
+                });
+            }, 1000);
+        }
+    }
 
     @Override
     protected void onPause() {
@@ -145,6 +156,7 @@ public class SignupActivity extends AppCompatActivity {
         if (listeningAnimation != null) {
             listeningAnimation.cancel();
         }
+        Speech.init(this, getPackageName());
         speechRecognitionManager.stopListening();
     }
 
@@ -155,6 +167,7 @@ public class SignupActivity extends AppCompatActivity {
         if (listeningAnimation != null) {
             listeningAnimation.cancel();
         }
+        Speech.init(this, getPackageName());
         speechRecognitionManager.destroy();
     }
 

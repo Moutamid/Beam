@@ -1,12 +1,15 @@
 package com.moutamid.beam.activities;
 
+import android.Manifest;
 import android.animation.AnimatorSet;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognitionListener;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
@@ -22,8 +25,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.moutamid.beam.utilis.SpeechUtils;
 import com.moutamid.beam.utilis.Stash;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.button.MaterialButton;
@@ -46,6 +51,8 @@ import com.moutamid.beam.utilis.FileUtils;
 import com.moutamid.beam.utilis.MicAnimation;
 import com.moutamid.beam.utilis.SpeechRecognitionManager;
 
+import net.gotev.speech.Speech;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -60,14 +67,57 @@ public class NewRequestActivity extends AppCompatActivity {
     private static final int PICK_FROM_GALLERY = 1002;
     private static final int PICK_DOCUMENT = 1003;
     ActivityNewRequestBinding binding;
-    AnimatorSet listeningAnimation;
-    private SpeechRecognitionManager speechRecognitionManager;
     RequestModel newRequest;
     ArrayList<DocumentModel> list;
     ArrayList<DocumentLinkModel> documents;
     final Calendar calendar = Calendar.getInstance();
     ProgressDialog progressDialog;
     UserModel userModel;
+
+
+    AnimatorSet listeningAnimation;
+    private SpeechRecognitionManager speechRecognitionManager;
+    SpeechUtils speechUtils = new SpeechUtils() {
+        @Override
+        public void onResult(String result) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Log.d(TAG, "onResult: " + result);
+            if (result.toLowerCase(Locale.ROOT).contains("go back")) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else if (result.toLowerCase(Locale.ROOT).contains("refresh")) {
+                refresh();
+            } else if (result.toLowerCase(Locale.ROOT).contains("attach document")) {
+                attachDocument();
+            } else if (result.toLowerCase(Locale.ROOT).contains("attach image") || result.toLowerCase(Locale.ROOT).contains("open gallery")) {
+                attachImage();
+            }  else if (result.toLowerCase(Locale.ROOT).contains("attach image from camera") || result.toLowerCase(Locale.ROOT).contains("open camera")) {
+                attachCamera();
+            }  else if (result.toLowerCase(Locale.ROOT).contains("select deadline") || result.toLowerCase(Locale.ROOT).contains("open deadline")) {
+                selectDeadline();
+            } else if (result.toLowerCase(Locale.ROOT).contains("create request") || result.toLowerCase(Locale.ROOT).contains("send request")) {
+                send();
+            } else {
+                if (binding.name.getEditText().hasFocus()) {
+                    binding.name.getEditText().setText(result.replace(" ", "").replace("-", ""));
+                }
+                if (binding.description.hasFocus()) {
+                    binding.description.setText(result.replace(" ", "").replace("-", ""));
+                }
+            }
+        }
+
+        @Override
+        public void onError(String error) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Toast.makeText(NewRequestActivity.this, error, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,13 +138,7 @@ public class NewRequestActivity extends AppCompatActivity {
         binding.toolbar.title.setText("New Request");
 
         binding.toolbar.refresh.setOnClickListener(v -> {
-            binding.name.getEditText().setText("");
-            binding.category.getEditText().setText("");
-            binding.description.setText("");
-            Intent intent = getIntent();
-            finish();
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            startActivity(intent);
+            refresh();
         });
 
         ArrayList<UserModel> usersList = new ArrayList<>();
@@ -134,16 +178,21 @@ public class NewRequestActivity extends AppCompatActivity {
 
         });
 
-        DatePickerDialog.OnDateSetListener date = (datePicker, year, month, day) -> {
-            calendar.set(Calendar.YEAR, year);
-            calendar.set(Calendar.MONTH, month);
-            calendar.set(Calendar.DAY_OF_MONTH, day);
-            newRequest.deadline = calendar.getTime().getTime();
-            binding.deadline.setText("Deadline : " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
-        };
-
         binding.calender.setOnClickListener(v -> {
-            new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+            selectDeadline();
+        });
+
+        binding.pause.setOnClickListener(v -> {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+        });
+        binding.stop.setOnClickListener(v -> {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
         });
 
         progressDialog = new ProgressDialog(this);
@@ -151,55 +200,6 @@ public class NewRequestActivity extends AppCompatActivity {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setCancelable(false);
         progressDialog.setMax(100);
-
-        listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
-
-        speechRecognitionManager = new SpeechRecognitionManager(this, new RecognitionListener() {
-            @Override
-            public void onResults(Bundle results) {
-                // Handle the speech recognition results
-                List<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                if (matches != null && !matches.isEmpty()) {
-                    String spokenText = matches.get(0);
-                    Log.d(TAG, "onResults: " + spokenText);
-                }
-            }
-
-            @Override
-            public void onError(int error) {
-                // Handle the error
-            }
-
-            @Override
-            public void onBeginningOfSpeech() {
-            }
-
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-            }
-
-            @Override
-            public void onRmsChanged(float rmsdB) {
-            }
-
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-            }
-
-            @Override
-            public void onPartialResults(Bundle partialResults) {
-            }
-
-            @Override
-            public void onEvent(int eventType, Bundle params) {
-            }
-        });
-
-        speechRecognitionManager.startListening();
 
         binding.mic.listen.setOnClickListener(v -> {
             if (listeningAnimation == null || !listeningAnimation.isRunning()) {
@@ -217,39 +217,77 @@ public class NewRequestActivity extends AppCompatActivity {
         });
 
         binding.attachCamera.setOnClickListener(v -> {
-            ImagePicker.with(this)
-                    .crop()
-                    .cameraOnly()
-                    .compress(1024)
-                    .maxResultSize(1080, 1080)
-                    .start(PICK_FROM_CAMERA);
+            attachCamera();
         });
 
         binding.attachImage.setOnClickListener(v -> {
-            ImagePicker.with(this)
-                    .crop()
-                    .galleryOnly()
-                    .compress(1024)
-                    .maxResultSize(1080, 1080)
-                    .start(PICK_FROM_GALLERY);
+            attachImage();
         });
 
         binding.attachDocument.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
-            startActivityForResult(intent, PICK_DOCUMENT);
+            attachDocument();
         });
 
         binding.send.setOnClickListener(v -> {
-            if (valid()) {
-                if (list.isEmpty()) {
-                    uploadModel();
-                } else {
-                    uploadDocuments(0);
-                }
-            }
+            send();
         });
+    }
+
+    private void selectDeadline() {
+        DatePickerDialog.OnDateSetListener date = (datePicker, year, month, day) -> {
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, month);
+            calendar.set(Calendar.DAY_OF_MONTH, day);
+            newRequest.deadline = calendar.getTime().getTime();
+            binding.deadline.setText("Deadline : " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+        };
+
+        new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void attachCamera() {
+        ImagePicker.with(this)
+                .crop()
+                .cameraOnly()
+                .compress(1024)
+                .maxResultSize(1080, 1080)
+                .start(PICK_FROM_CAMERA);
+    }
+
+    private void attachImage() {
+        ImagePicker.with(this)
+                .crop()
+                .galleryOnly()
+                .compress(1024)
+                .maxResultSize(1080, 1080)
+                .start(PICK_FROM_GALLERY);
+    }
+
+    private void attachDocument() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, PICK_DOCUMENT);
+    }
+
+    private void send() {
+        if (valid()) {
+            if (list.isEmpty()) {
+                uploadModel();
+            } else {
+                uploadDocuments(0);
+            }
+        }
+    }
+
+    private void refresh() {
+        binding.name.getEditText().setText("");
+        binding.category.getEditText().setText("");
+        binding.description.setText("");
+        Intent intent = getIntent();
+        finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        startActivity(intent);
     }
 
     private boolean valid() {
@@ -279,6 +317,16 @@ public class NewRequestActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Constants.initDialog(this);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            new Handler().postDelayed(() -> {
+                runOnUiThread(() -> {
+                    Speech.init(this, getPackageName());
+                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                    speechRecognitionManager.startListening();
+                });
+            }, 1000);
+        }
     }
 
     private void uploadDocuments(int i) {
@@ -373,7 +421,6 @@ public class NewRequestActivity extends AppCompatActivity {
             dialog.dismiss();
             updateView();
         });
-
     }
 
     DocumentsAdapter documentsAdapter;

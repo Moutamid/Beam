@@ -1,11 +1,15 @@
 package com.moutamid.beam.activities;
 
+import android.Manifest;
+import android.animation.AnimatorSet;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -16,11 +20,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.moutamid.beam.utilis.MicAnimation;
+import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
 import com.moutamid.beam.utilis.Stash;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -39,15 +47,49 @@ import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
 
+import net.gotev.speech.Speech;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class RequestPreviewActivity extends AppCompatActivity {
+    private static final String TAG = "RequestPreviewActivity";
     ActivityRequestPreviewBinding binding;
     RequestModel requestModel;
     ArrayList<RequestModel> requestList;
     ArrayList<UserModel> usersList;
+
+    AnimatorSet listeningAnimation;
+    private SpeechRecognitionManager speechRecognitionManager;
+    SpeechUtils speechUtils = new SpeechUtils() {
+        @Override
+        public void onResult(String result) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Log.d(TAG, "onResult: " + result);
+            if (result.toLowerCase(Locale.ROOT).contains("go back")) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else if (result.toLowerCase(Locale.ROOT).contains("reply")) {
+                startActivity(new Intent(RequestPreviewActivity.this, RequestResponseActivity.class));
+            } else if (result.toLowerCase(Locale.ROOT).contains("order")) {
+                if (!passID.isEmpty()) {
+                    startActivity(new Intent(RequestPreviewActivity.this, UserProfileActivity.class).putExtra("USER_ID", passID));
+                }
+            }
+        }
+
+        @Override
+        public void onError(String error) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Toast.makeText(RequestPreviewActivity.this, error, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +189,18 @@ public class RequestPreviewActivity extends AppCompatActivity {
             CategoryAdapter categoryAdapter = new CategoryAdapter(this, requestModel.mandatory, null);
             binding.madatoryItems.setAdapter(categoryAdapter);
         }
+
+        binding.mic.listen.setOnClickListener(v -> {
+            if (listeningAnimation == null || !listeningAnimation.isRunning()) {
+                listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                speechRecognitionManager.startListening();
+            } else {
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+                listeningAnimation = null;
+                speechRecognitionManager.stopListening();
+            }
+        });
+
     }
 
     private void documentList() {
@@ -243,12 +297,21 @@ public class RequestPreviewActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
         Constants.initDialog(this);
         Constants.showDialog();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            new Handler().postDelayed(() -> {
+                runOnUiThread(() -> {
+                    Speech.init(this, getPackageName());
+                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                    speechRecognitionManager.startListening();
+                });
+            }, 2000);
+        }
         getReplies();
     }
 
@@ -309,7 +372,7 @@ public class RequestPreviewActivity extends AppCompatActivity {
         }
     }
 
-    private static final String TAG = "RequestPreviewActivity";
+    public String passID = "";
 
     private void showData(String userID) {
         binding.replyLayout.setVisibility(View.VISIBLE);
@@ -317,6 +380,8 @@ public class RequestPreviewActivity extends AppCompatActivity {
 
         binding.replyTitle.setText(model.title);
         binding.replyDescription.setText(model.description);
+
+        passID = userID;
 
         binding.order.setOnClickListener(v -> startActivity(new Intent(this, UserProfileActivity.class).putExtra("USER_ID", userID)));
 

@@ -39,6 +39,9 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
   //  implementation(libs.stash)
+
+    // Speech Recognition
+    implementation("net.gotev:speech:1.6.2")
     implementation(libs.gson)
     implementation(libs.glide)
     implementation(libs.volley)

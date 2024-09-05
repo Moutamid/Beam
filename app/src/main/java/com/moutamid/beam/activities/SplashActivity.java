@@ -29,14 +29,11 @@ public class SplashActivity extends AppCompatActivity {
         });
 
         new Handler().postDelayed(() -> {
-//            startActivity(new Intent(SplashActivity.this, TestActivity.class));
-//            finish();
-
             if (Constants.auth().getCurrentUser() != null) {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 finish();
             } else {
-                startActivity(new Intent(SplashActivity.this, TestActivity.class));
+                startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
                 finish();
             }
         }, 2000);

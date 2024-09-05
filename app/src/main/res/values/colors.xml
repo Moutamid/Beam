@@ -16,4 +16,13 @@
     <color name="grey4">#EEEEEE</color>
     <color name="text">#808080</color>
     <color name="stroke">#85808A</color>
+
+    <array name="progressBallColors">
+        <item>@android:color/holo_green_light</item>
+        <item>@android:color/holo_blue_light</item>
+        <item>@android:color/holo_purple</item>
+        <item>@android:color/holo_orange_light</item>
+        <item>@android:color/holo_red_light</item>
+    </array>
+
 </resources>

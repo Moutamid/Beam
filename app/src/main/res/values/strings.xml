@@ -25,6 +25,13 @@
         <item>Event Planning &amp; Catering</item>
     </string-array>
 
+    <string name="progress_msg_listening">Listening…</string>
+    <string name="confirm">Confirm</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="start">Start DKS</string>
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

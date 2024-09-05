@@ -1,15 +1,19 @@
 package com.moutamid.beam.activities;
 
+import android.Manifest;
+import android.animation.AnimatorSet;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
-import com.moutamid.beam.utilis.Stash;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -23,6 +27,12 @@ import com.moutamid.beam.databinding.ActivityOtpBinding;
 import com.moutamid.beam.models.LocationModel;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.MicAnimation;
+import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
+import com.moutamid.beam.utilis.Stash;
+
+import net.gotev.speech.Speech;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -33,6 +43,42 @@ public class OtpActivity extends AppCompatActivity {
     UserModel userModel;
     String verificationId;
     private static final String TAG = "OtpActivity";
+
+    AnimatorSet listeningAnimation;
+    private SpeechRecognitionManager speechRecognitionManager;
+
+    SpeechUtils speechUtils = new SpeechUtils() {
+        @Override
+        public void onResult(String result) {
+            Log.d(TAG, "onResult: " + result);
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            if (result.toLowerCase(Locale.ROOT).contains("go back")) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else if (result.toLowerCase(Locale.ROOT).contains("verify")) {
+                verify();
+            }  else if (result.toLowerCase(Locale.ROOT).contains("resend")) {
+                login();
+            } else if (result.toLowerCase(Locale.ROOT).contains("select otp")) {
+                binding.otp.getEditText().requestFocus();
+            } else {
+                if (binding.otp.getEditText().hasFocus()) {
+                    binding.otp.getEditText().setText(result.replace(" ", "").replace("-", ""));
+                }
+            }
+        }
+
+        @Override
+        public void onError(String error) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Toast.makeText(OtpActivity.this, error, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +100,29 @@ public class OtpActivity extends AppCompatActivity {
         });
 
         binding.create.setOnClickListener(v -> {
-            if (!binding.otp.getEditText().getText().toString().isEmpty() && verificationId != null) {
-                Constants.showDialog();
-                verifyCode();
+            verify();
+        });
+
+        binding.mic.listen.setOnClickListener(v -> {
+            if (listeningAnimation == null || !listeningAnimation.isRunning()) {
+                listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                speechRecognitionManager.startListening();
+            } else {
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+                listeningAnimation = null;
+                speechRecognitionManager.stopListening();
             }
         });
 
+    }
+
+    private void verify() {
+        if (!binding.otp.getEditText().getText().toString().isEmpty() && verificationId != null) {
+            Constants.showDialog();
+            verifyCode();
+        } else {
+            Toast.makeText(this, "OTP is empty", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void verifyCode() {
@@ -196,5 +259,15 @@ public class OtpActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Constants.initDialog(this);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            new Handler().postDelayed(() -> {
+                runOnUiThread(() -> {
+                    Speech.init(this, getPackageName());
+                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                    speechRecognitionManager.startListening();
+                });
+            }, 1000);
+        }
     }
 }

@@ -1,37 +1,69 @@
 package com.moutamid.beam.activities;
 
+import android.Manifest;
 import android.animation.AnimatorSet;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.speech.RecognitionListener;
-import android.speech.SpeechRecognizer;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
-import android.window.OnBackInvokedDispatcher;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.core.content.ContextCompat;
 
-import com.moutamid.beam.utilis.Stash;
-import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivityLoginBinding;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.MicAnimation;
 import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
+import com.moutamid.beam.utilis.Stash;
 
-import java.util.List;
+import net.gotev.speech.Speech;
+
+import java.util.Locale;
 
 public class LoginActivity extends AppCompatActivity {
+    private static final String TAG = "LoginActivity";
     ActivityLoginBinding binding;
     AnimatorSet listeningAnimation;
     private SpeechRecognitionManager speechRecognitionManager;
-    private static final String TAG = "LoginActivity";
+
+    SpeechUtils speechUtils = new SpeechUtils() {
+        @Override
+        public void onResult(String result) {
+            Log.d(TAG, "onResult: " + result);
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            if (result.toLowerCase(Locale.ROOT).contains("go back")) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else if (result.toLowerCase(Locale.ROOT).contains("login")) {
+                login();
+            } else if (result.toLowerCase(Locale.ROOT).contains("select phone")) {
+                binding.phone.getEditText().requestFocus();
+            } else if (result.toLowerCase(Locale.ROOT).contains("write phone number")){
+                binding.phone.getEditText().requestFocus();
+            } else {
+                if (binding.phone.getEditText().hasFocus()) {
+                    binding.phone.getEditText().setText(result.replace(" ", "").replace("-", ""));
+                }
+            }
+        }
+
+        @Override
+        public void onError(String error) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Toast.makeText(LoginActivity.this, error, Toast.LENGTH_SHORT).show();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,42 +79,6 @@ public class LoginActivity extends AppCompatActivity {
 
         binding.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
-
-        speechRecognitionManager = new SpeechRecognitionManager(this, new RecognitionListener() {
-            @Override
-            public void onResults(Bundle results) {
-                // Handle the speech recognition results
-                List<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                if (matches != null && !matches.isEmpty()) {
-                    String spokenText = matches.get(0);
-                    Log.d(TAG, "onResults: " + spokenText);
-                }
-            }
-
-            @Override
-            public void onError(int error) {
-                // Handle the error
-            }
-
-            @Override
-            public void onBeginningOfSpeech() {}
-            @Override
-            public void onBufferReceived(byte[] buffer) {}
-            @Override
-            public void onEndOfSpeech() {}
-            @Override
-            public void onRmsChanged(float rmsdB) {}
-            @Override
-            public void onReadyForSpeech(Bundle params) {}
-            @Override
-            public void onPartialResults(Bundle partialResults) {}
-            @Override
-            public void onEvent(int eventType, Bundle params) {}
-        });
-
-        speechRecognitionManager.startListening();
-
         binding.mic.listen.setOnClickListener(v -> {
             if (listeningAnimation == null || !listeningAnimation.isRunning()) {
                 listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
@@ -95,18 +91,22 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         binding.create.setOnClickListener(v -> {
-            if (valid()) {
-                UserModel userModel = new UserModel();
-                userModel.phoneNumber = binding.ccp.getSelectedCountryCodeWithPlus() + binding.phone.getEditText().getText().toString();
-                Stash.put(Constants.STASH_USER, userModel);
-                startActivity(new Intent(this, OtpActivity.class));
-            }
+            login();
         });
 
     }
 
+    private void login() {
+        if (valid()) {
+            UserModel userModel = new UserModel();
+            userModel.phoneNumber = binding.ccp.getSelectedCountryCodeWithPlus() + binding.phone.getEditText().getText().toString();
+            Stash.put(Constants.STASH_USER, userModel);
+            startActivity(new Intent(this, OtpActivity.class));
+        }
+    }
+
     private boolean valid() {
-        if (binding.phone.getEditText().getText().toString().isEmpty()){
+        if (binding.phone.getEditText().getText().toString().isEmpty()) {
             binding.phone.getEditText().setError("required*");
             binding.phone.getEditText().requestFocus();
             return false;
@@ -117,12 +117,21 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            new Handler().postDelayed(() -> {
+                runOnUiThread(() -> {
+                    Speech.init(this, getPackageName());
+                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                    speechRecognitionManager.startListening();
+                });
+            }, 1000);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Cancel the animation when the activity is paused
         if (listeningAnimation != null) {
             listeningAnimation.cancel();
         }
@@ -132,7 +141,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Cancel the animation when the activity is destroyed
         if (listeningAnimation != null) {
             listeningAnimation.cancel();
         }
