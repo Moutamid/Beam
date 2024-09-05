@@ -38,17 +38,14 @@ android {
 dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
-  //  implementation(libs.stash)
 
-    // Speech Recognition
-    implementation("net.gotev:speech:1.6.2")
+    implementation(libs.speech)
     implementation(libs.gson)
     implementation(libs.glide)
     implementation(libs.volley)
     implementation(libs.ccp)
     implementation(libs.imagepicker)
     implementation(libs.simpleratingbar)
- //   implementation(libs.circleimageview)
 
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-database")
