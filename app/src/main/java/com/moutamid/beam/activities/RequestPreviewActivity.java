@@ -352,7 +352,16 @@ public class RequestPreviewActivity extends AppCompatActivity {
             Constants.databaseReference().child(Constants.USER).child(model.userID).get().addOnSuccessListener(dataSnapshot -> {
                 if (dataSnapshot.exists()) {
                     UserModel user = dataSnapshot.getValue(UserModel.class);
-                    usersList.add(user);
+                    int DISTANCE = Stash.getInt(Constants.DISTANCE, 0);
+                    if (DISTANCE != 0) {
+                        UserModel currentUser = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
+                        double distance = Constants.calculateDistance(currentUser.location.lat, currentUser.location.log, user.location.lat, user.location.log);
+                        if (distance <= DISTANCE) {
+                            usersList.add(user);
+                        }
+                    } else {
+                        usersList.add(user);
+                    }
                 }
                 getUsers(pos + 1);
             });

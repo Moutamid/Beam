@@ -7,22 +7,13 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.speech.RecognitionListener;
-import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivityWelcomeBinding;
 import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.MicAnimation;
@@ -33,8 +24,6 @@ import net.gotev.speech.Speech;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 public class WelcomeActivity extends AppCompatActivity {
@@ -158,7 +147,8 @@ public class WelcomeActivity extends AppCompatActivity {
         if (listeningAnimation != null) {
             listeningAnimation.cancel();
         }
-        speechRecognitionManager.stopListening();
+        if (speechRecognitionManager != null)
+            speechRecognitionManager.stopListening();
     }
 
     @Override

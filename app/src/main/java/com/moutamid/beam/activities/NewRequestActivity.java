@@ -157,8 +157,19 @@ public class NewRequestActivity extends AppCompatActivity {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         UserModel user = snapshot.getValue(UserModel.class);
                         if (Constants.auth().getCurrentUser() != null) {
-                            if (!user.id.equals(Constants.auth().getCurrentUser().getUid()) && user.category.equals(category)) {
-                                usersList.add(user);
+                            if (user != null) {
+                                if (!user.id.equals(Constants.auth().getCurrentUser().getUid()) && user.category.equals(category)) {
+                                    int DISTANCE = Stash.getInt(Constants.DISTANCE, 0);
+                                    if (DISTANCE != 0) {
+                                        UserModel currentUser = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
+                                        double distance = Constants.calculateDistance(currentUser.location.lat, currentUser.location.log, user.location.lat, user.location.log);
+                                        if (distance <= DISTANCE) {
+                                            usersList.add(user);
+                                        }
+                                    } else {
+                                        usersList.add(user);
+                                    }
+                                }
                             }
                         }
                     }

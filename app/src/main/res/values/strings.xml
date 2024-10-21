@@ -23,6 +23,7 @@
         <item>Locksmith Services</item>
         <item>Handyman Services</item>
         <item>Event Planning &amp; Catering</item>
+        <item>Other</item>
     </string-array>
 
     <string name="progress_msg_listening">Listening…</string>
