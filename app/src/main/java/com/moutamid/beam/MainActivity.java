@@ -2,6 +2,7 @@ package com.moutamid.beam;
 
 import android.Manifest;
 import android.animation.AnimatorSet;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -10,7 +11,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -22,12 +27,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.moutamid.beam.activities.ActiveOrdersActivity;
 import com.moutamid.beam.activities.NewRequestActivity;
 import com.moutamid.beam.activities.SettingActivity;
 import com.moutamid.beam.adapters.CategoryAdapter;
@@ -245,25 +252,24 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.toolbar.more.setOnClickListener(v -> {
-            startActivity(new Intent(this, SettingActivity.class));
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View customView = inflater.inflate(R.layout.buttons, null);
+            PopupWindow popupWindow = new PopupWindow(customView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+            popupWindow.showAsDropDown(v);
+            int[] location = new int[2];
+            v.getLocationOnScreen(location);
+            popupWindow.showAtLocation(v, Gravity.NO_GRAVITY, location[0], location[1]);
+            MaterialButton profile = customView.findViewById(R.id.profile);
+            MaterialButton settings = customView.findViewById(R.id.settings);
 
-//            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//            View customView = inflater.inflate(R.layout.buttons, null);
-//            PopupWindow popupWindow = new PopupWindow(customView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-//            popupWindow.showAsDropDown(v);
-//            int[] location = new int[2];
-//            v.getLocationOnScreen(location);
-//            popupWindow.showAtLocation(v, Gravity.NO_GRAVITY, location[0], location[1]);
-//            MaterialButton profile = customView.findViewById(R.id.profile);
-//            MaterialButton settings = customView.findViewById(R.id.settings);
-//
-//            profile.setOnClickListener(v1 -> {
-//                popupWindow.dismiss();
-//            });
-//            settings.setOnClickListener(v1 -> {
-//                popupWindow.dismiss();
-//                startActivity(new Intent(this, SettingActivity.class));
-//            });
+            profile.setOnClickListener(v1 -> {
+                popupWindow.dismiss();
+                startActivity(new Intent(this, ActiveOrdersActivity.class));
+            });
+            settings.setOnClickListener(v1 -> {
+                popupWindow.dismiss();
+                startActivity(new Intent(this, SettingActivity.class));
+            });
         });
 
         binding.toolbar.newResponse.setOnClickListener(v -> {

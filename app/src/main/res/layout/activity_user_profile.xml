@@ -144,7 +144,7 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/attach_rating"
+                        android:id="@+id/activeClose"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:clickable="true"
@@ -152,12 +152,29 @@
                         app:cardCornerRadius="12dp"
                         app:strokeWidth="0dp">
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_margin="10dp"
-                            android:src="@drawable/star"
-                            app:tint="@color/yellow" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:padding="10dp"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/checkIcon"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/circle_check_solid"
+                                app:tint="@color/yellow" />
+
+                            <TextView
+                                android:id="@+id/activeText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="5dp"
+                                android:text="Activate Order"
+                                android:textColor="@color/yellow" />
+
+                        </LinearLayout>
 
                     </com.google.android.material.card.MaterialCardView>
 

@@ -16,45 +16,40 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
-import com.moutamid.beam.utilis.MicAnimation;
-import com.moutamid.beam.utilis.SpeechRecognitionManager;
-import com.moutamid.beam.utilis.SpeechUtils;
-import com.moutamid.beam.utilis.Stash;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputLayout;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivityUserProfileBinding;
 import com.moutamid.beam.fragments.ChatFragment;
 import com.moutamid.beam.fragments.MapFragment;
+import com.moutamid.beam.models.OrderModel;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.MicAnimation;
+import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
+import com.moutamid.beam.utilis.Stash;
 
 import net.gotev.speech.Speech;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 public class UserProfileActivity extends AppCompatActivity {
     private static final String TAG = "UserProfileActivity";
     ActivityUserProfileBinding binding;
     UserModel userModel;
-    String userID;
+    String userID, REQUEST_ID;
     UserModel stash;
-
-
+    boolean isActive = false;
     AnimatorSet listeningAnimation;
     private SpeechRecognitionManager speechRecognitionManager;
 
@@ -70,11 +65,11 @@ public class UserProfileActivity extends AppCompatActivity {
                 getOnBackPressedDispatcher().onBackPressed();
             } else if (result.toLowerCase(Locale.ROOT).contains("open map")) {
                 showMap();
-            }  else if (result.toLowerCase(Locale.ROOT).contains("open chat")) {
+            } else if (result.toLowerCase(Locale.ROOT).contains("open chat")) {
                 chat();
-            } else if (result.toLowerCase(Locale.ROOT).contains("rate user")) {
+            } else if (result.toLowerCase(Locale.ROOT).contains("a")) {
                 attachRating();
-            }  else if (result.toLowerCase(Locale.ROOT).contains("call user")) {
+            } else if (result.toLowerCase(Locale.ROOT).contains("call user")) {
                 Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + userModel.phoneNumber));
                 startActivity(intent);
             }
@@ -100,9 +95,12 @@ public class UserProfileActivity extends AppCompatActivity {
         binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         userID = getIntent().getStringExtra("USER_ID");
+        REQUEST_ID = getIntent().getStringExtra("REQUEST_ID");
+
+        checkOrder();
 
         Constants.databaseReference().child(Constants.USER).child(userID).get().addOnSuccessListener(dataSnapshot -> {
-            if (dataSnapshot.exists()){
+            if (dataSnapshot.exists()) {
                 userModel = dataSnapshot.getValue(UserModel.class);
 
                 binding.name.setText(userModel.name);
@@ -151,8 +149,9 @@ public class UserProfileActivity extends AppCompatActivity {
             chat();
         });
 
-        binding.attachRating.setOnClickListener(v -> {
-            attachRating();
+        binding.activeClose.setOnClickListener(v -> {
+            if (isActive) attachRating();
+            else activeOrder();
         });
 
 
@@ -167,6 +166,23 @@ public class UserProfileActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void checkOrder() {
+
+    }
+    OrderModel order;
+    private void activeOrder() {
+        order = new OrderModel();
+        order.id = UUID.randomUUID().toString();
+        order.userID = userID;
+        order.requestID = REQUEST_ID;
+        Constants.databaseReference().child(Constants.ORDER).child(Constants.auth().getCurrentUser().getUid()).child(order.id).setPriority(order)
+                .addOnSuccessListener(unused -> {
+                    isActive = true;
+                    binding.checkIcon.setImageResource(R.drawable.circle_xmark_solid);
+                    binding.activeText.setText("Close Order");
+                });
     }
 
     private void chat() {

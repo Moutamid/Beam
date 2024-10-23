@@ -21,10 +21,10 @@
             android:backgroundTint="@color/grey3"
             android:gravity="start|center"
             android:paddingStart="20dp"
-            android:text="Profile"
+            android:text="Active Orders"
             android:textColor="@color/black"
             app:cornerRadius="12dp"
-            app:icon="@drawable/user"
+            app:icon="@drawable/circle_check_solid"
             app:iconPadding="20dp"
             app:iconTint="@color/black" />
 

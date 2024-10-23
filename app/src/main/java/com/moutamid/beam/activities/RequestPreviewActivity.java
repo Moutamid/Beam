@@ -26,10 +26,6 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.moutamid.beam.utilis.MicAnimation;
-import com.moutamid.beam.utilis.SpeechRecognitionManager;
-import com.moutamid.beam.utilis.SpeechUtils;
-import com.moutamid.beam.utilis.Stash;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
@@ -46,6 +42,10 @@ import com.moutamid.beam.models.DocumentLinkModel;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.MicAnimation;
+import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
+import com.moutamid.beam.utilis.Stash;
 
 import net.gotev.speech.Speech;
 
@@ -76,7 +76,9 @@ public class RequestPreviewActivity extends AppCompatActivity {
                 startActivity(new Intent(RequestPreviewActivity.this, RequestResponseActivity.class));
             } else if (result.toLowerCase(Locale.ROOT).contains("order")) {
                 if (!passID.isEmpty()) {
-                    startActivity(new Intent(RequestPreviewActivity.this, UserProfileActivity.class).putExtra("USER_ID", passID));
+                    startActivity(new Intent(RequestPreviewActivity.this, UserProfileActivity.class)
+                            .putExtra("REQUEST_ID", requestModel.ID)
+                            .putExtra("USER_ID", passID));
                 }
             }
         }
@@ -99,6 +101,14 @@ public class RequestPreviewActivity extends AppCompatActivity {
 
         requestModel = (RequestModel) Stash.getObject(Constants.PASS_REQUEST, RequestModel.class);
 
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+
+        if (data != null) {
+            String itemId = data.getLastPathSegment();
+            Log.d(TAG, "onCreate: itemId " + itemId);
+        }
+
         requestList = new ArrayList<>();
         usersList = new ArrayList<>();
 
@@ -107,7 +117,23 @@ public class RequestPreviewActivity extends AppCompatActivity {
         if (requestModel.userID.equals(Constants.auth().getCurrentUser().getUid())) {
             binding.toolbar.stop.setVisibility(View.VISIBLE);
         }
+
+        binding.toolbar.share.setVisibility(View.VISIBLE);
         binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        binding.toolbar.share.setOnClickListener(v -> {
+
+            String message = "Title: " + requestModel.title + "\n\n" +
+                    "Description: " + requestModel.description +
+                    "If you're interested, please contact me for further discussion.\n\n" +
+                    "Play Store Link: https://play.google.com/store/apps/details?id=" + getPackageName();
+
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, message);
+            shareIntent.setType("text/plain");
+            startActivity(Intent.createChooser(shareIntent, "Share via"));
+        });
 
         binding.toolbar.stop.setOnClickListener(v -> {
             new MaterialAlertDialogBuilder(this)
@@ -392,7 +418,10 @@ public class RequestPreviewActivity extends AppCompatActivity {
 
         passID = userID;
 
-        binding.order.setOnClickListener(v -> startActivity(new Intent(this, UserProfileActivity.class).putExtra("USER_ID", userID)));
+        binding.order.setOnClickListener(v -> startActivity(new Intent(this, UserProfileActivity.class)
+                .putExtra("USER_ID", userID)
+                .putExtra("REQUEST_ID", requestModel.ID)
+        ));
 
         if (model.documents != null) {
             if (model.documents.isEmpty()) {

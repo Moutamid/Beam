@@ -32,6 +32,9 @@
         android:theme="@style/Theme.Beam"
         tools:targetApi="31">
         <activity
+            android:name=".activities.ActiveOrdersActivity"
+            android:exported="false" />
+        <activity
             android:name=".TestActivity"
             android:exported="false" />
         <activity
@@ -42,7 +45,19 @@
             android:exported="false" />
         <activity
             android:name=".activities.RequestPreviewActivity"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="beam.com"
+                    android:pathPrefix="/myapp/item"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".activities.RequestResponseActivity"
             android:exported="false" />
