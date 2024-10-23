@@ -15,7 +15,6 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.RemoteMessage;
-import com.moutamid.beam.R;
 import com.moutamid.beam.activities.SplashActivity;
 
 public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
@@ -41,7 +40,8 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(new long[]{100, 300, 300, 300}, -1);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder((Context) this, "CHANNEL_ID");
+        String channelId = "com.moutamid.beam.CHANNEL_ID";
+        NotificationCompat.Builder builder = new NotificationCompat.Builder((Context) this, channelId);
 
         builder.setSmallIcon(com.moutamid.beam.R.drawable.ic_launcher_foreground);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 1, new Intent(this, SplashActivity.class),
@@ -54,8 +54,8 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         builder.setPriority(2);
         this.mNotificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26) {
-            this.mNotificationManager.createNotificationChannel(new NotificationChannel("CHANNEL_ID", "Channel human readable title", NotificationManager.IMPORTANCE_HIGH));
-            builder.setChannelId("CHANNEL_ID");
+            this.mNotificationManager.createNotificationChannel(new NotificationChannel(channelId, "Channel human readable title", NotificationManager.IMPORTANCE_HIGH));
+            builder.setChannelId(channelId);
         }
         this.mNotificationManager.notify(100, builder.build());
     }

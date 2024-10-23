@@ -29,6 +29,20 @@
             app:iconTint="@color/black" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/grey3"
+            android:gravity="start|center"
+            android:paddingStart="20dp"
+            android:text="Manage Categories"
+            android:textColor="@color/black"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/list_solid"
+            app:iconPadding="20dp"
+            app:iconTint="@color/black" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

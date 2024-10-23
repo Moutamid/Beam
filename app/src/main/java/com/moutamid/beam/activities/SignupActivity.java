@@ -108,6 +108,7 @@ public class SignupActivity extends AppCompatActivity {
         if (valid()) {
             UserModel userModel = new UserModel();
             userModel.name = binding.name.getEditText().getText().toString().trim();
+            userModel.isAnonymous = false;
             userModel.category = binding.category.getEditText().getText().toString().trim();
             userModel.phoneNumber = binding.ccp.getSelectedCountryCodeWithPlus() + binding.phone.getEditText().getText().toString().trim();
             Stash.put(Constants.STASH_USER, userModel);

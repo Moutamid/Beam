@@ -20,6 +20,9 @@ import com.moutamid.beam.databinding.ActivitySettingBinding;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SettingActivity extends AppCompatActivity {
     ActivitySettingBinding binding;
     @Override
@@ -43,6 +46,9 @@ public class SettingActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Stash.put(Constants.ANONYMOUS, isChecked);
+                Map<String, Object> map = new HashMap<>();
+                map.put("isAnonymous", isChecked);
+                Constants.databaseReference().child(Constants.USER).child(Constants.auth().getCurrentUser().getUid()).updateChildren(map);
             }
         });
 

@@ -35,6 +35,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.moutamid.beam.activities.ActiveOrdersActivity;
+import com.moutamid.beam.activities.ManageCategoryActivity;
 import com.moutamid.beam.activities.NewRequestActivity;
 import com.moutamid.beam.activities.SettingActivity;
 import com.moutamid.beam.adapters.CategoryAdapter;
@@ -261,14 +262,25 @@ public class MainActivity extends AppCompatActivity {
             popupWindow.showAtLocation(v, Gravity.NO_GRAVITY, location[0], location[1]);
             MaterialButton profile = customView.findViewById(R.id.profile);
             MaterialButton settings = customView.findViewById(R.id.settings);
+            MaterialButton cat= customView.findViewById(R.id.category);
+
+            if (Constants.auth().getCurrentUser().getUid().equals(Constants.ADMIN_ID)) {
+                cat.setVisibility(View.VISIBLE);
+            } else cat.setVisibility(View.GONE);
 
             profile.setOnClickListener(v1 -> {
                 popupWindow.dismiss();
                 startActivity(new Intent(this, ActiveOrdersActivity.class));
             });
+
             settings.setOnClickListener(v1 -> {
                 popupWindow.dismiss();
                 startActivity(new Intent(this, SettingActivity.class));
+            });
+
+            cat.setOnClickListener(v1 -> {
+                popupWindow.dismiss();
+                startActivity(new Intent(this, ManageCategoryActivity.class));
             });
         });
 

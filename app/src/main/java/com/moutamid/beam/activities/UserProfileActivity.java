@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.database.DataSnapshot;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.moutamid.beam.R;
 import com.moutamid.beam.databinding.ActivityUserProfileBinding;
@@ -67,8 +68,10 @@ public class UserProfileActivity extends AppCompatActivity {
                 showMap();
             } else if (result.toLowerCase(Locale.ROOT).contains("open chat")) {
                 chat();
-            } else if (result.toLowerCase(Locale.ROOT).contains("a")) {
-                attachRating();
+            } else if (result.toLowerCase(Locale.ROOT).contains("activate order")) {
+                activeOrder();
+            } else if (result.toLowerCase(Locale.ROOT).contains("close order")) {
+                closeOrder();
             } else if (result.toLowerCase(Locale.ROOT).contains("call user")) {
                 Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + userModel.phoneNumber));
                 startActivity(intent);
@@ -134,12 +137,20 @@ public class UserProfileActivity extends AppCompatActivity {
                 double distance = Constants.calculateDistance(stash.location.lat, stash.location.log, userModel.location.lat, userModel.location.log);
                 binding.distance.setText(Constants.formatDistance(distance));
 
-                LatLng currentLatLng = new LatLng(userModel.location.lat, userModel.location.log);
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new MapFragment(currentLatLng)).commit();
+                if (userID.equals(Constants.ADMIN_ID)) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel)).commit();
+                } else {
+                    LatLng currentLatLng = new LatLng(userModel.location.lat, userModel.location.log);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new MapFragment(currentLatLng)).commit();
+                }
             }
         }).addOnFailureListener(e -> {
             Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
         });
+
+        if (userID.equals(Constants.ADMIN_ID)) {
+            binding.map.setVisibility(View.GONE);
+        } else binding.map.setVisibility(View.VISIBLE);
 
         binding.map.setOnClickListener(v -> {
             showMap();
@@ -150,7 +161,7 @@ public class UserProfileActivity extends AppCompatActivity {
         });
 
         binding.activeClose.setOnClickListener(v -> {
-            if (isActive) attachRating();
+            if (isActive) closeOrder();
             else activeOrder();
         });
 
@@ -168,16 +179,50 @@ public class UserProfileActivity extends AppCompatActivity {
 
     }
 
-    private void checkOrder() {
-
+    private void closeOrder() {
+        if (order != null) {
+            Constants.databaseReference().child(Constants.ORDER).child(Constants.auth().getCurrentUser().getUid()).child(order.getId()).removeValue()
+                    .addOnSuccessListener(unused -> {
+                        isActive = false;
+                        binding.checkIcon.setImageResource(R.drawable.circle_check_solid);
+                        binding.activeText.setText("Activate Order");
+                        attachRating();
+                    });
+        } else {
+            attachRating();
+        }
     }
+
+    private void checkOrder() {
+        Constants.databaseReference().child(Constants.ORDER).child(Constants.auth().getCurrentUser().getUid())
+                .get().addOnSuccessListener(dataSnapshot -> {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            order = snapshot.getValue(OrderModel.class);
+                            if (order.userID.equals(userID) && order.requestID.equals(REQUEST_ID)) {
+                                isActive = true;
+                                binding.checkIcon.setImageResource(R.drawable.circle_xmark_solid);
+                                binding.activeText.setText("Close Order");
+                                break;
+                            } else {
+                                order = null;
+                            }
+                        }
+                    } else {
+                        isActive = false;
+                    }
+                });
+    }
+
     OrderModel order;
+
     private void activeOrder() {
         order = new OrderModel();
-        order.id = UUID.randomUUID().toString();
-        order.userID = userID;
-        order.requestID = REQUEST_ID;
-        Constants.databaseReference().child(Constants.ORDER).child(Constants.auth().getCurrentUser().getUid()).child(order.id).setPriority(order)
+        order.setId(UUID.randomUUID().toString());
+        order.setUserID(userID);
+        order.setRequestID(REQUEST_ID);
+        Constants.databaseReference().child(Constants.ORDER).child(Constants.auth().getCurrentUser().getUid())
+                .child(order.getId()).setValue(order)
                 .addOnSuccessListener(unused -> {
                     isActive = true;
                     binding.checkIcon.setImageResource(R.drawable.circle_xmark_solid);

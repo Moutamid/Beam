@@ -9,18 +9,17 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.moutamid.beam.R;
-import com.moutamid.beam.databinding.ActivityActiveOrdersBinding;
+import com.moutamid.beam.databinding.ActivityManageCategoryBinding;
 
-public class ActiveOrdersActivity extends AppCompatActivity {
-    ActivityActiveOrdersBinding binding;
+public class ManageCategoryActivity extends AppCompatActivity {
+    ActivityManageCategoryBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityActiveOrdersBinding.inflate(getLayoutInflater());
+        binding = ActivityManageCategoryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.toolbar.title.setText("Active Orders");
-        binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
 
     }
 }
