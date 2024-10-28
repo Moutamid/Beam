@@ -7,9 +7,12 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.OpenableColumns;
 import android.speech.RecognitionListener;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
@@ -28,6 +31,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.moutamid.beam.adapters.MandatoryAdapter;
+import com.moutamid.beam.models.CategoryModel;
 import com.moutamid.beam.utilis.SpeechUtils;
 import com.moutamid.beam.utilis.Stash;
 import com.github.dhaval2404.imagepicker.ImagePicker;
@@ -53,9 +58,11 @@ import com.moutamid.beam.utilis.SpeechRecognitionManager;
 
 import net.gotev.speech.Speech;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -118,6 +125,14 @@ public class NewRequestActivity extends AppCompatActivity {
             Toast.makeText(NewRequestActivity.this, error, Toast.LENGTH_SHORT).show();
         }
     };
+    String[] service_categories;
+
+    private void updateServiceCategories(ArrayList<CategoryModel> category) {
+        // Map category names and store them in the service_categories array
+        service_categories = category.stream()
+                .map(cat -> cat.name)
+                .toArray(String[]::new);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,9 +158,28 @@ public class NewRequestActivity extends AppCompatActivity {
 
         ArrayList<UserModel> usersList = new ArrayList<>();
 
-        String[] service_categories = getResources().getStringArray(R.array.service_categories);
-        ArrayAdapter<String> subject = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, service_categories);
-        binding.categoryList.setAdapter(subject);
+        service_categories = new String[]{};
+
+        Constants.databaseReference().child(Constants.CATEGORIES).get().addOnSuccessListener(snapshot -> {
+            ArrayList<CategoryModel> category = new ArrayList<>();
+            if (snapshot.exists()) {
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    CategoryModel topicsModel = dataSnapshot.getValue(CategoryModel.class);
+                    category.add(topicsModel);
+                }
+                category.sort(Comparator.comparing(categoryModel -> categoryModel.name));
+                service_categories = category.stream()
+                        .map(cat -> cat.name)
+                        .toArray(String[]::new);
+                ArrayAdapter<String> subject = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, service_categories);
+                binding.categoryList.setAdapter(subject);
+            } else {
+                service_categories = getResources().getStringArray(R.array.service_categories);
+                ArrayAdapter<String> subject = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, service_categories);
+                binding.categoryList.setAdapter(subject);
+            }
+        });
+
 
         binding.categoryList.setOnItemClickListener((parent, view, position, id) -> {
             String category = service_categories[position];
@@ -438,7 +472,7 @@ public class NewRequestActivity extends AppCompatActivity {
 
     private void updateView() {
         if (newRequest.mandatory != null) {
-            CategoryAdapter adapter = new CategoryAdapter(this, newRequest.mandatory, null);
+            MandatoryAdapter adapter = new MandatoryAdapter(this, newRequest.mandatory);
             binding.mandatoryRC.setAdapter(adapter);
         }
 
@@ -493,19 +527,44 @@ public class NewRequestActivity extends AppCompatActivity {
         speechRecognitionManager.destroy();
     }
 
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_DOCUMENT) {
-            if (resultCode == RESULT_OK && data != null) {
-                list.add(new DocumentModel(data.getData(), true));
-                updateView();
-            }
-        } else {
-            if (resultCode == RESULT_OK && data != null) {
-                list.add(new DocumentModel(data.getData(), false));
-                updateView();
+        if (resultCode == RESULT_OK && data != null) {
+            Uri fileUri = data.getData();
+            if (fileUri != null) {
+                try {
+                    // Determine if file size exceeds the 10 MB limit
+                    if (getFileSize(fileUri) > MAX_FILE_SIZE) {
+                        showToast("File size must be less than 10 MB");
+                    } else {
+                        boolean isPickedDocument = (requestCode == PICK_DOCUMENT);
+                        list.add(new DocumentModel(fileUri, isPickedDocument));
+                        updateView();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showToast("Failed to get file size");
+                }
             }
         }
     }
+
+    // Helper method to get file size from Uri
+    private long getFileSize(Uri uri) throws IOException {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+        cursor.moveToFirst();
+        long size = cursor.getLong(sizeIndex);
+        cursor.close();
+        return size;
+    }
+
+    // Helper method to show a Toast message
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
 }

@@ -14,16 +14,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.moutamid.beam.R;
 import com.moutamid.beam.listeners.CategoryListener;
+import com.moutamid.beam.models.CategoryModel;
 
 import java.util.ArrayList;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryVH> {
     Context context;
-    ArrayList<String> list;
+    ArrayList<CategoryModel> list;
     CategoryListener categoryListener;
     private int selectedItemPosition = 0;
 
-    public CategoryAdapter(Context context, ArrayList<String> list, CategoryListener categoryListener) {
+    public CategoryAdapter(Context context, ArrayList<CategoryModel> list, CategoryListener categoryListener) {
         this.context = context;
         this.list = list;
         this.categoryListener = categoryListener;
@@ -37,8 +38,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
     @Override
     public void onBindViewHolder(@NonNull CategoryVH holder, int position) {
-        String s = list.get(holder.getAbsoluteAdapterPosition());
-        holder.text.setText(s);
+        CategoryModel s = list.get(holder.getAbsoluteAdapterPosition());
+        holder.text.setText(s.name);
 
         if (categoryListener != null) {
             if (holder.getAbsoluteAdapterPosition() == selectedItemPosition) {
@@ -52,7 +53,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             }
 
             holder.itemView.setOnClickListener(v -> {
-                categoryListener.selected(s);
+                categoryListener.selected(s.name);
 
                 int previousItemPosition = selectedItemPosition;
                 selectedItemPosition = holder.getAbsoluteAdapterPosition();

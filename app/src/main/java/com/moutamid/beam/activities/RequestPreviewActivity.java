@@ -37,6 +37,7 @@ import com.moutamid.beam.adapters.ContactsAdapter;
 import com.moutamid.beam.adapters.DocumentsLinkAdapter;
 import com.moutamid.beam.adapters.DocumentsList;
 import com.moutamid.beam.adapters.ImageAdapter;
+import com.moutamid.beam.adapters.MandatoryAdapter;
 import com.moutamid.beam.databinding.ActivityRequestPreviewBinding;
 import com.moutamid.beam.models.DocumentLinkModel;
 import com.moutamid.beam.models.RequestModel;
@@ -212,7 +213,7 @@ public class RequestPreviewActivity extends AppCompatActivity {
         });
 
         if (requestModel.mandatory != null) {
-            CategoryAdapter categoryAdapter = new CategoryAdapter(this, requestModel.mandatory, null);
+            MandatoryAdapter categoryAdapter = new MandatoryAdapter(this, requestModel.mandatory);
             binding.madatoryItems.setAdapter(categoryAdapter);
         }
 
@@ -437,7 +438,7 @@ public class RequestPreviewActivity extends AppCompatActivity {
         }
 
         if (model.mandatory != null) {
-            CategoryAdapter categoryAdapter = new CategoryAdapter(this, model.mandatory, null);
+            MandatoryAdapter categoryAdapter = new MandatoryAdapter(this, model.mandatory);
             binding.madatoryItemsReply.setAdapter(categoryAdapter);
         }
 

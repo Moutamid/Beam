@@ -38,9 +38,11 @@ import com.moutamid.beam.activities.ActiveOrdersActivity;
 import com.moutamid.beam.activities.ManageCategoryActivity;
 import com.moutamid.beam.activities.NewRequestActivity;
 import com.moutamid.beam.activities.SettingActivity;
+import com.moutamid.beam.adapters.CategoriesAdapter;
 import com.moutamid.beam.adapters.CategoryAdapter;
 import com.moutamid.beam.adapters.RequestsAdapter;
 import com.moutamid.beam.databinding.ActivityMainBinding;
+import com.moutamid.beam.models.CategoryModel;
 import com.moutamid.beam.models.LocationModel;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
@@ -53,7 +55,7 @@ import com.moutamid.beam.utilis.Stash;
 import net.gotev.speech.Speech;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -200,25 +202,34 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: SUBSCRIBE");
         }).addOnFailureListener(e -> Log.d(TAG, "onCreate: " + e.getLocalizedMessage()));
 
-
-        String[] service_categories = getResources().getStringArray(R.array.service_categories);
-        ArrayList<String> category = new ArrayList<>(Arrays.asList(service_categories));
-        category.add(0, "All");
-        CategoryAdapter categoryAdapter = new CategoryAdapter(this, category, query -> {
-            if (adapter != null) {
-                if (query.equals("All")) adapter.getFilter().filter("");
-                else adapter.getFilter().filter(query);
-
-                if (adapter.getItemCount() == 0) {
-                    binding.noLayout.setVisibility(View.VISIBLE);
-                    binding.recycler.setVisibility(View.GONE);
-                } else {
-                    binding.noLayout.setVisibility(View.GONE);
-                    binding.recycler.setVisibility(View.VISIBLE);
+        ArrayList<CategoryModel> category = new ArrayList<>();
+        Constants.databaseReference().child(Constants.CATEGORIES).get().addOnSuccessListener(snapshot -> {
+            Constants.dismissDialog();
+            if (snapshot.exists()) {
+                category.clear();
+                category.add(0, new CategoryModel("ALL", "All"));
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    CategoryModel topicsModel = dataSnapshot.getValue(CategoryModel.class);
+                    category.add(topicsModel);
                 }
+                category.sort(Comparator.comparing(categoryModel -> categoryModel.name));
+                CategoryAdapter categoryAdapter = new CategoryAdapter(this, category, query -> {
+                    if (adapter != null) {
+                        if (query.equals("All")) adapter.getFilter().filter("");
+                        else adapter.getFilter().filter(query);
+
+                        if (adapter.getItemCount() == 0) {
+                            binding.noLayout.setVisibility(View.VISIBLE);
+                            binding.recycler.setVisibility(View.GONE);
+                        } else {
+                            binding.noLayout.setVisibility(View.GONE);
+                            binding.recycler.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+                binding.categoryRC.setAdapter(categoryAdapter);
             }
         });
-        binding.categoryRC.setAdapter(categoryAdapter);
 
         requestMissingPermissions();
 
@@ -262,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
             popupWindow.showAtLocation(v, Gravity.NO_GRAVITY, location[0], location[1]);
             MaterialButton profile = customView.findViewById(R.id.profile);
             MaterialButton settings = customView.findViewById(R.id.settings);
-            MaterialButton cat= customView.findViewById(R.id.category);
+            MaterialButton cat = customView.findViewById(R.id.category);
 
             if (Constants.auth().getCurrentUser().getUid().equals(Constants.ADMIN_ID)) {
                 cat.setVisibility(View.VISIBLE);
@@ -377,16 +388,16 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Constants.initDialog(this);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            new Handler().postDelayed(() -> {
-                runOnUiThread(() -> {
-                    Speech.init(this, getPackageName());
-                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
-                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
-                    speechRecognitionManager.startListening();
-                });
-            }, 1000);
-        }
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+//            new Handler().postDelayed(() -> {
+//                runOnUiThread(() -> {
+//                    Speech.init(this, getPackageName());
+//                    speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+//                    listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+//                    speechRecognitionManager.startListening();
+//                });
+//            }, 1000);
+//        }
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

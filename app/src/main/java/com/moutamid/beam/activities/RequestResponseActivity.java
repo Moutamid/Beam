@@ -34,6 +34,7 @@ import com.google.firebase.storage.UploadTask;
 import com.moutamid.beam.R;
 import com.moutamid.beam.adapters.CategoryAdapter;
 import com.moutamid.beam.adapters.DocumentsAdapter;
+import com.moutamid.beam.adapters.MandatoryAdapter;
 import com.moutamid.beam.databinding.ActivityRequestResponseBinding;
 import com.moutamid.beam.models.DocumentLinkModel;
 import com.moutamid.beam.models.DocumentModel;
@@ -404,7 +405,7 @@ public class RequestResponseActivity extends AppCompatActivity {
 
     private void updateView() {
         if (newRequest.mandatory != null) {
-            CategoryAdapter adapter = new CategoryAdapter(this, newRequest.mandatory, null);
+            MandatoryAdapter adapter = new MandatoryAdapter(this, newRequest.mandatory);
             binding.mandatoryRC.setAdapter(adapter);
         }
 
