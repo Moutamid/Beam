@@ -1,7 +1,6 @@
 package com.moutamid.beam.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.moutamid.beam.utilis.Stash;
 import com.moutamid.beam.R;
-import com.moutamid.beam.activities.UserProfileActivity;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.Stash;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -48,8 +46,10 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     @Override
     public void onBindViewHolder(@NonNull ContactVH holder, int position) {
         UserModel userModel = list.get(holder.getAbsoluteAdapterPosition());
-        holder.name.setText(userModel.name);
-        Glide.with(context).load(userModel.image).placeholder(R.drawable.profile_icon).into(holder.image);
+        String name = userModel.isAnonymous ? "Anonymous" : userModel.name;
+        holder.name.setText(name);
+        String image = userModel.isAnonymous ? "" : userModel.image;
+        Glide.with(context).load(image).placeholder(R.drawable.profile_icon).into(holder.image);
         double distance = Constants.calculateDistance(currentUser.location.lat, currentUser.location.log, userModel.location.lat, userModel.location.log);
         holder.distance.setText(Constants.formatDistance(distance));
 
@@ -64,9 +64,11 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             holder.rating.setText("0.0 (0)");
         }
 
-        holder.itemView.setOnClickListener(v -> {
-            listener.onClick(userModel.id);
-        });
+        if (listener != null) {
+            holder.itemView.setOnClickListener(v -> {
+                listener.onClick(userModel.id);
+            });
+        }
     }
 
     @Override

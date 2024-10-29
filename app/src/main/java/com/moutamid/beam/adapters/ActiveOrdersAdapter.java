@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.moutamid.beam.utilis.Stash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -26,22 +25,21 @@ import com.moutamid.beam.activities.UserProfileActivity;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.Stash;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 
-public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.RequestVH> implements Filterable {
+public class ActiveOrdersAdapter extends RecyclerView.Adapter<ActiveOrdersAdapter.RequestVH> {
     Context context;
     ArrayList<RequestModel> list;
-    ArrayList<RequestModel> listAll;
     private static final String TAG = "RequestsAdapter";
 
-    public RequestsAdapter(Context context, ArrayList<RequestModel> list) {
+    public ActiveOrdersAdapter(Context context, ArrayList<RequestModel> list) {
         this.context = context;
         this.list = list;
-        this.listAll = new ArrayList<>(list);
     }
 
     @NonNull
@@ -64,10 +62,8 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         UserModel userModel = snapshot.getValue(UserModel.class);
                         Log.d(TAG, "onDataChange: " + userModel.isAnonymous);
-                        String name = userModel.isAnonymous ? "Anonymous" : userModel.name;
-                        holder.name.setText(name);
-                        String image = userModel.isAnonymous ? "" : userModel.image;
-                        Glide.with(context).load(image).placeholder(R.drawable.profile_icon).into(holder.image);
+                        holder.name.setText(userModel.name);
+                        Glide.with(context).load(userModel.image).placeholder(R.drawable.profile_icon).into(holder.image);
 
                         if (userModel.status) {
                             holder.status.setBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.green)));
@@ -104,13 +100,13 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
             }
         }
 
-        holder.image.setOnClickListener(v-> {
-         //   context.startActivity(new Intent(context, UserProfileActivity.class).putExtra("USER_ID", requestModel.userID));
-        });
-
         holder.itemView.setOnClickListener(v -> {
-            Stash.put(Constants.PASS_REQUEST, requestModel);
-            context.startActivity(new Intent(context, RequestPreviewActivity.class));
+            Log.d("UserProfileActivity", "onBindViewHolder: requestModel.key  " + requestModel.key);
+            context.startActivity(new Intent(context, UserProfileActivity.class)
+                    .putExtra("REQUESTER_ID", requestModel.ID)
+                    .putExtra("USER_ID", requestModel.userID)
+                    .putExtra("REQUEST_ID", requestModel.key)
+            );
         });
     }
 
@@ -118,39 +114,6 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
     public int getItemCount() {
         return list.size();
     }
-
-    @Override
-    public Filter getFilter() {
-        return filter;
-    }
-
-    Filter filter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            ArrayList<RequestModel> filterList = new ArrayList<>();
-            if (constraint.toString().isEmpty()) {
-                filterList.addAll(listAll);
-            } else {
-                for (RequestModel listModel : listAll) {
-                    if (listModel.title.toLowerCase().contains(constraint.toString().toLowerCase()) ||
-                            listModel.category.toLowerCase().contains(constraint.toString().toLowerCase())) {
-                        filterList.add(listModel);
-                    }
-                }
-            }
-            FilterResults filterResults = new FilterResults();
-            filterResults.values = filterList;
-
-            return filterResults;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            list.clear();
-            list.addAll((Collection<? extends RequestModel>) results.values);
-            notifyDataSetChanged();
-        }
-    };
 
     public static class RequestVH extends RecyclerView.ViewHolder {
         ImageView image, containImage, containDocument;

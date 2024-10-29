@@ -164,8 +164,11 @@ public class RequestResponseActivity extends AppCompatActivity {
                 .get().addOnSuccessListener(dataSnapshot -> {
                     if (dataSnapshot.exists()) {
                         UserModel userModel = dataSnapshot.getValue(UserModel.class);
-                        binding.name.setText(userModel.name);
-                        Glide.with(RequestResponseActivity.this).load(userModel.image).placeholder(R.drawable.profile_icon).into(binding.image);
+                        String name = userModel.isAnonymous ? "Anonymous" : userModel.name;
+                        binding.name.setText(name);
+                        String image = userModel.isAnonymous ? "" : userModel.image;
+                        Glide.with(RequestResponseActivity.this).load(image).placeholder(R.drawable.profile_icon).into(binding.image);
+
                         if (userModel.rating != null) {
                             float rating = 0;
                             for (double commentModel : userModel.rating) rating += commentModel;

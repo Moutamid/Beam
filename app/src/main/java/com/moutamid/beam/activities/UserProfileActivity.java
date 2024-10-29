@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.moutamid.beam.R;
@@ -48,7 +49,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private static final String TAG = "UserProfileActivity";
     ActivityUserProfileBinding binding;
     UserModel userModel;
-    String userID, REQUEST_ID;
+    String userID, REQUEST_ID, REQUESTER_ID;
     UserModel stash;
     boolean isActive = false;
     AnimatorSet listeningAnimation;
@@ -94,11 +95,15 @@ public class UserProfileActivity extends AppCompatActivity {
         binding = ActivityUserProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         binding.toolbar.title.setText("user");
-        binding.toolbar.stop.setVisibility(View.VISIBLE);
         binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         userID = getIntent().getStringExtra("USER_ID");
         REQUEST_ID = getIntent().getStringExtra("REQUEST_ID");
+        REQUESTER_ID = getIntent().getStringExtra("REQUESTER_ID");
+
+        Log.d(TAG, "userID: " + userID);
+        Log.d(TAG, "REQUEST_ID: " + REQUEST_ID);
+        Log.d(TAG, "REQUESTER_ID: " + REQUESTER_ID);
 
         checkOrder();
 
@@ -199,7 +204,7 @@ public class UserProfileActivity extends AppCompatActivity {
                     if (dataSnapshot.exists()) {
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             order = snapshot.getValue(OrderModel.class);
-                            if (order.userID.equals(userID) && order.requestID.equals(REQUEST_ID)) {
+                            if (order.userID.equals(userID) && order.requesterID.equals(REQUESTER_ID)) {
                                 isActive = true;
                                 binding.checkIcon.setImageResource(R.drawable.circle_xmark_solid);
                                 binding.activeText.setText("Close Order");
@@ -215,13 +220,26 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     OrderModel order;
-
     private void activeOrder() {
         order = new OrderModel();
         order.setId(UUID.randomUUID().toString());
         order.setUserID(userID);
         order.setRequestID(REQUEST_ID);
+        order.setRequesterID(REQUESTER_ID);
         Constants.databaseReference().child(Constants.ORDER).child(Constants.auth().getCurrentUser().getUid())
+                .child(order.getId()).setValue(order)
+                .addOnSuccessListener(unused -> {
+                    activeOrderUser();
+                });
+    }
+
+    private void activeOrderUser() {
+        OrderModel order = new OrderModel();
+        order.setId(UUID.randomUUID().toString());
+        order.setUserID(Constants.auth().getCurrentUser().getUid());
+        order.setRequestID(REQUEST_ID);
+        order.setRequesterID(REQUESTER_ID);
+        Constants.databaseReference().child(Constants.ORDER).child(userID)
                 .child(order.getId()).setValue(order)
                 .addOnSuccessListener(unused -> {
                     isActive = true;

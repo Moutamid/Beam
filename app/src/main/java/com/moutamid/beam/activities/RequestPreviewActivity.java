@@ -32,7 +32,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.moutamid.beam.R;
-import com.moutamid.beam.adapters.CategoryAdapter;
 import com.moutamid.beam.adapters.ContactsAdapter;
 import com.moutamid.beam.adapters.DocumentsLinkAdapter;
 import com.moutamid.beam.adapters.DocumentsList;
@@ -78,6 +77,7 @@ public class RequestPreviewActivity extends AppCompatActivity {
             } else if (result.toLowerCase(Locale.ROOT).contains("order")) {
                 if (!passID.isEmpty()) {
                     startActivity(new Intent(RequestPreviewActivity.this, UserProfileActivity.class)
+                            .putExtra("REQUESTER_ID", REQUESTER_ID)
                             .putExtra("REQUEST_ID", requestModel.ID)
                             .putExtra("USER_ID", passID));
                 }
@@ -143,7 +143,11 @@ public class RequestPreviewActivity extends AppCompatActivity {
                     .setPositiveButton("Yes", (dialog, which) -> {
                         dialog.dismiss();
                         Constants.databaseReference().child(Constants.REQUESTS).child(requestModel.userID).child(requestModel.ID).removeValue()
-                                .addOnSuccessListener(unused -> getOnBackPressedDispatcher().onBackPressed())
+                                .addOnSuccessListener(unused -> {
+                                    Constants.databaseReference().child(Constants.REQUESTS_REPLY).child(requestModel.ID).removeValue()
+                                            .addOnSuccessListener(unused2 -> getOnBackPressedDispatcher().onBackPressed())
+                                            .addOnFailureListener(e -> Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show());
+                                })
                                 .addOnFailureListener(e -> Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show());
                     }).setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                     .show();
@@ -164,8 +168,10 @@ public class RequestPreviewActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         UserModel userModel = snapshot.getValue(UserModel.class);
                         if (!isDestroyed()) {
-                            binding.username.setText(userModel.name);
-                            Glide.with(RequestPreviewActivity.this).load(userModel.image).placeholder(R.drawable.profile_icon).into(binding.image);
+                            String name = userModel.isAnonymous ? "Anonymous" : userModel.name;
+                            binding.username.setText(name);
+                            String image = userModel.isAnonymous ? "" : userModel.image;
+                            Glide.with(RequestPreviewActivity.this).load(image).placeholder(R.drawable.profile_icon).into(binding.image);
 
                             if (userModel.status) {
                                 binding.status.setBackgroundTintList(ColorStateList.valueOf(RequestPreviewActivity.this.getColor(R.color.green)));
@@ -409,6 +415,7 @@ public class RequestPreviewActivity extends AppCompatActivity {
     }
 
     public String passID = "";
+    public String REQUESTER_ID = "";
 
     private void showData(String userID) {
         binding.replyLayout.setVisibility(View.VISIBLE);
@@ -418,9 +425,11 @@ public class RequestPreviewActivity extends AppCompatActivity {
         binding.replyDescription.setText(model.description);
 
         passID = userID;
+        REQUESTER_ID = model.ID;
 
         binding.order.setOnClickListener(v -> startActivity(new Intent(this, UserProfileActivity.class)
                 .putExtra("USER_ID", userID)
+                .putExtra("REQUESTER_ID", REQUESTER_ID)
                 .putExtra("REQUEST_ID", requestModel.ID)
         ));
 

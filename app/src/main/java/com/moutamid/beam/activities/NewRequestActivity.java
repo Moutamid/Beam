@@ -13,8 +13,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
-import android.speech.RecognitionListener;
-import android.speech.SpeechRecognizer;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +32,9 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.moutamid.beam.adapters.MandatoryAdapter;
+import com.moutamid.beam.fragments.CategoryFragment;
+import com.moutamid.beam.fragments.DescriptionFragment;
+import com.moutamid.beam.fragments.DocumentsFragment;
 import com.moutamid.beam.models.CategoryModel;
 import com.moutamid.beam.utilis.SpeechUtils;
 import com.moutamid.beam.utilis.Stash;
@@ -43,7 +46,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.UploadTask;
 import com.moutamid.beam.R;
-import com.moutamid.beam.adapters.CategoryAdapter;
 import com.moutamid.beam.adapters.ContactsAdapter;
 import com.moutamid.beam.adapters.DocumentsAdapter;
 import com.moutamid.beam.databinding.ActivityNewRequestBinding;
@@ -64,9 +66,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NewRequestActivity extends AppCompatActivity {
     private static final String TAG = "NewRequestActivity";
@@ -140,6 +142,36 @@ public class NewRequestActivity extends AppCompatActivity {
         binding = ActivityNewRequestBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new CategoryFragment()).commit();
+        AtomicInteger current = new AtomicInteger();
+        binding.previous.setVisibility(View.GONE);
+
+        binding.next.setOnClickListener(v -> {
+            binding.previous.setVisibility(View.VISIBLE);
+            if (current.get() == 0) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new DescriptionFragment()).commit();
+                current.incrementAndGet();
+            } else if (current.get() == 1) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new DocumentsFragment()).commit();
+                current.incrementAndGet();
+                binding.next.setText("Publish");
+            } else {
+
+            }
+        });
+
+        binding.previous.setOnClickListener(v -> {
+            if (current.get() == 1) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new CategoryFragment()).commit();
+                current.decrementAndGet();
+                binding.previous.setVisibility(View.GONE);
+            } else if (current.get() == 2) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new DescriptionFragment()).commit();
+                current.decrementAndGet();
+            }
+            binding.next.setText("Next");
+        });
+
         documents = new ArrayList<>();
         list = new ArrayList<>();
 
@@ -148,12 +180,45 @@ public class NewRequestActivity extends AppCompatActivity {
         userModel = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
         Glide.with(this).load(userModel.image).placeholder(R.drawable.profile_icon).into(binding.image);
 
-        binding.toolbar.back.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        binding.toolbar.back.setOnClickListener(v -> {
+            Stash.clear(Constants.SAVE_REQUEST);
+            getOnBackPressedDispatcher().onBackPressed();
+        });
         binding.toolbar.refresh.setVisibility(View.VISIBLE);
         binding.toolbar.title.setText("New Request");
 
         binding.toolbar.refresh.setOnClickListener(v -> {
             refresh();
+        });
+
+        binding.description.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!s.toString().isEmpty()) {
+                    String[] title = s.toString().split(" ");
+                    int wordCount = Math.min(title.length, 10);
+                    StringBuilder firstTenWords = new StringBuilder();
+                    for (int i = 0; i < wordCount; i++) {
+                        firstTenWords.append(title[i]);
+                        if (i < wordCount - 1) {
+                            firstTenWords.append(" ");
+                        }
+                    }
+                    binding.name.getEditText().setText(firstTenWords);
+                } else {
+                    binding.name.getEditText().setText("");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
         });
 
         ArrayList<UserModel> usersList = new ArrayList<>();
@@ -215,8 +280,10 @@ public class NewRequestActivity extends AppCompatActivity {
                     binding.noContact.setVisibility(View.GONE);
                     binding.contactRC.setVisibility(View.VISIBLE);
                 }
-                ContactsAdapter adapter = new ContactsAdapter(NewRequestActivity.this, usersList,
-                        userID -> startActivity(new Intent(this, UserProfileActivity.class).putExtra("USER_ID", userID))
+                ContactsAdapter adapter = new ContactsAdapter(NewRequestActivity.this, usersList, null
+//                        userID -> {
+//                            startActivity(new Intent(this, UserProfileActivity.class).putExtra("USER_ID", userID));
+//                        }
                 );
                 binding.contactRC.setAdapter(adapter);
             });
@@ -286,7 +353,6 @@ public class NewRequestActivity extends AppCompatActivity {
             newRequest.deadline = calendar.getTime().getTime();
             binding.deadline.setText("Deadline : " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
         };
-
         new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
@@ -341,20 +407,20 @@ public class NewRequestActivity extends AppCompatActivity {
             binding.category.getEditText().requestFocus();
             return false;
         }
-        if (binding.name.getEditText().getText().toString().isEmpty()) {
-            binding.name.getEditText().setError("required*");
-            binding.name.getEditText().requestFocus();
-            return false;
-        }
+//        if (binding.name.getEditText().getText().toString().isEmpty()) {
+//            binding.name.getEditText().setError("required*");
+//            binding.name.getEditText().requestFocus();
+//            return false;
+//        }
         if (binding.description.getText().toString().isEmpty()) {
             binding.description.setError("required*");
             binding.description.requestFocus();
             return false;
         }
-        if (newRequest.deadline == 0) {
-            Toast.makeText(this, "Deadline is required", Toast.LENGTH_SHORT).show();
-            return false;
-        }
+//        if (newRequest.deadline == 0) {
+//            Toast.makeText(this, "Deadline is required", Toast.LENGTH_SHORT).show();
+//            return false;
+//        }
         return true;
     }
 
@@ -411,6 +477,11 @@ public class NewRequestActivity extends AppCompatActivity {
         newRequest.category = binding.category.getEditText().getText().toString();
         newRequest.timestamp = new Date().getTime();
         newRequest.userID = userModel.id;
+
+        if (newRequest.deadline == 0) {
+            long currentTime = System.currentTimeMillis();
+            newRequest.deadline = currentTime + (48 * 60 * 60 * 1000);
+        }
 
         Constants.databaseReference().child(Constants.REQUESTS).child(userModel.id).child(newRequest.ID).setValue(newRequest)
                 .addOnSuccessListener(unused -> {

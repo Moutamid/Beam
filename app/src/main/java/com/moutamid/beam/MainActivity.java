@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                             binding.recycler.setVisibility(View.VISIBLE);
                         }
                     }
-                });
+                }, false);
                 binding.categoryRC.setAdapter(categoryAdapter);
             }
         });

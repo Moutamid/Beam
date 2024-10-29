@@ -158,7 +158,9 @@ public class WelcomeActivity extends AppCompatActivity {
         if (listeningAnimation != null) {
             listeningAnimation.cancel();
         }
-        speechRecognitionManager.stopListening();
+        if (speechRecognitionManager != null) {
+            speechRecognitionManager.stopListening();
+        }
     }
 
     @Override
@@ -168,7 +170,9 @@ public class WelcomeActivity extends AppCompatActivity {
         if (listeningAnimation != null) {
             listeningAnimation.cancel();
         }
-        speechRecognitionManager.destroy();
+        if (speechRecognitionManager != null) {
+            speechRecognitionManager.destroy();
+        }
     }
 
     @Override
@@ -176,6 +180,9 @@ public class WelcomeActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Speech.init(this, getPackageName());
+                speechRecognitionManager = new SpeechRecognitionManager(this, speechUtils);
+                listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
                 speechRecognitionManager.startListening();
             } else {
                 Toast.makeText(this, "Permission for recording audio was denied", Toast.LENGTH_SHORT).show();

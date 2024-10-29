@@ -2,29 +2,24 @@ package com.moutamid.beam.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.DragEvent;
-import android.view.View;
+import android.util.Log;
 import android.widget.CompoundButton;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.material.slider.Slider;
-import com.moutamid.beam.utilis.Stash;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.moutamid.beam.R;
+import com.google.android.material.slider.Slider;
 import com.moutamid.beam.databinding.ActivitySettingBinding;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.Stash;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class SettingActivity extends AppCompatActivity {
     ActivitySettingBinding binding;
+    private static final String TAG = "SettingActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,14 +33,19 @@ public class SettingActivity extends AppCompatActivity {
 
         int DISTANCE = Stash.getInt(Constants.DISTANCE, 0);
 
-        binding.anonymous.setChecked(Stash.getBoolean(Constants.ANONYMOUS, false));
-
+        Constants.databaseReference().child(Constants.USER).child(Constants.auth().getCurrentUser().getUid())
+                .get().addOnSuccessListener(dataSnapshot -> {
+                    if (dataSnapshot.exists()) {
+                        UserModel userModel = dataSnapshot.getValue(UserModel.class);
+                        Log.d(TAG, "onCreate: " + userModel.isAnonymous);
+                        binding.anonymous.setChecked(userModel.isAnonymous);
+                    }
+                });
         binding.distance.setValue(DISTANCE);
 
         binding.anonymous.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Stash.put(Constants.ANONYMOUS, isChecked);
                 Map<String, Object> map = new HashMap<>();
                 map.put("isAnonymous", isChecked);
                 Constants.databaseReference().child(Constants.USER).child(Constants.auth().getCurrentUser().getUid()).updateChildren(map);
