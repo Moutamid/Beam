@@ -1,30 +1,40 @@
 package com.moutamid.beam.fragments;
 
+import android.Manifest;
+import android.animation.AnimatorSet;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.moutamid.beam.R;
-import com.moutamid.beam.adapters.DocumentsAdapter;
 import com.moutamid.beam.adapters.MandatoryAdapter;
 import com.moutamid.beam.databinding.FragmentDescriptionBinding;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.utilis.Constants;
+import com.moutamid.beam.utilis.MicAnimation;
+import com.moutamid.beam.utilis.SpeechRecognitionManager;
+import com.moutamid.beam.utilis.SpeechUtils;
 import com.moutamid.beam.utilis.Stash;
+
+import net.gotev.speech.Speech;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,10 +44,41 @@ import java.util.Locale;
 public class DescriptionFragment extends Fragment {
     FragmentDescriptionBinding binding;
     RequestModel requestModel;
+    private static final String TAG = "DescriptionFragment";
 
     public DescriptionFragment() {
         // Required empty public constructor
     }
+
+    AnimatorSet listeningAnimation;
+    private SpeechRecognitionManager speechRecognitionManager;
+    SpeechUtils speechUtils = new SpeechUtils() {
+        @Override
+        public void onResult(String result) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Log.d(TAG, "onResult: " + result);
+            if (result.toLowerCase(Locale.ROOT).contains("select deadline") || result.toLowerCase(Locale.ROOT).contains("open deadline")) {
+                selectDeadline();
+            } else {
+                if (binding.description.hasFocus()) {
+                    binding.description.append(result + " ");
+                    binding.description.setSelection(binding.description.getText().length());
+                }
+            }
+        }
+
+        @Override
+        public void onError(String error) {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+            Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,6 +86,8 @@ public class DescriptionFragment extends Fragment {
         binding = FragmentDescriptionBinding.inflate(getLayoutInflater(), container, false);
 
         requestModel = (RequestModel) Stash.getObject(Constants.SAVE_REQUEST, RequestModel.class);
+
+        Log.d(TAG, "onCreateView: " + requestModel.category);
 
         if (requestModel.description != null) {
             binding.description.setText(requestModel.description);
@@ -99,7 +142,72 @@ public class DescriptionFragment extends Fragment {
             selectDeadline();
         });
 
+        binding.pause.setOnClickListener(v -> {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+        });
+        binding.stop.setOnClickListener(v -> {
+            if (listeningAnimation != null) {
+                listeningAnimation.cancel();
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+            }
+        });
+
+        binding.mic.listen.setOnClickListener(v -> {
+            if (listeningAnimation == null || !listeningAnimation.isRunning()) {
+                listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                speechRecognitionManager.startListening();
+            } else {
+                MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+                listeningAnimation = null;
+                speechRecognitionManager.stopListening();
+            }
+        });
+
         return binding.getRoot();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            new Handler().postDelayed(() -> {
+                if (isAdded() && getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Speech.init(requireContext(), requireContext().getPackageName());
+                        speechRecognitionManager = new SpeechRecognitionManager(requireContext(), speechUtils);
+                        listeningAnimation = MicAnimation.startListeningAnimation(binding.mic.foreground, binding.mic.background);
+                        speechRecognitionManager.startListening();
+                    });
+                }
+            }, 1000);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Cancel the animation when the activity is paused
+        if (listeningAnimation != null) {
+            listeningAnimation.cancel();
+        }
+        if (speechRecognitionManager != null) {
+            speechRecognitionManager.stopListening();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // Cancel the animation when the activity is destroyed
+        if (listeningAnimation != null) {
+            listeningAnimation.cancel();
+        }
+        if (speechRecognitionManager != null) {
+            speechRecognitionManager.destroy();
+        }
     }
 
     final Calendar calendar = Calendar.getInstance();

@@ -192,15 +192,13 @@ public class MainActivity extends AppCompatActivity {
 
         list = new ArrayList<>();
 
-        FirebaseDatabase.getInstance().getReference().child("server_key").get()
-                .addOnSuccessListener(dataSnapshot -> {
-                    String key = dataSnapshot.getValue(String.class);
-                    Stash.put(Constants.KEY, key);
-                });
-
-        FirebaseMessaging.getInstance().subscribeToTopic(Constants.auth().getCurrentUser().getUid()).addOnSuccessListener(unused -> {
-            Log.d(TAG, "onCreate: SUBSCRIBE");
-        }).addOnFailureListener(e -> Log.d(TAG, "onCreate: " + e.getLocalizedMessage()));
+        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(s -> {
+            Log.d("NotificationHelper", "getToken: " + s);
+            Constants.databaseReference().child(Constants.USER).child(Constants.auth().getCurrentUser().getUid()).child("fcmToken").setValue(s);
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        });
 
         ArrayList<CategoryModel> category = new ArrayList<>();
         Constants.databaseReference().child(Constants.CATEGORIES).get().addOnSuccessListener(snapshot -> {
@@ -296,6 +294,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.toolbar.newResponse.setOnClickListener(v -> {
+            Stash.clear(Constants.SAVE_REQUEST);
+            Stash.clear(Constants.DOCUMENTS);
+            Stash.clear(Constants.REQUESTERS);
             startActivity(new Intent(MainActivity.this, NewRequestActivity.class));
         });
 

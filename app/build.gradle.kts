@@ -20,6 +20,12 @@ android {
 
     buildFeatures { viewBinding = true }
 
+    packagingOptions {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -54,6 +60,9 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-messaging")
+
+    implementation("com.google.api-client:google-api-client:1.32.1")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.18.0")
 
     implementation(libs.appcompat)
     implementation(libs.material)

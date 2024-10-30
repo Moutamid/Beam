@@ -29,7 +29,8 @@ import java.util.Locale;
 
 public class Constants {
     public static final String USER = "USER";
-    public static final String KEY = "KEY";
+    public static final String REQUESTERS = "REQUESTERS";
+    public static final String DOCUMENTS = "DOCUMENTS";
     public static final String CATEGORIES = "CATEGORIES";
     public static final String ORDER = "ORDER";
     public static final String REQUESTS = "REQUESTS";

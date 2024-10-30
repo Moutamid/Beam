@@ -1,6 +1,7 @@
 package com.moutamid.beam.adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,13 +46,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         if (model.isDoc) {
             holder.image.setVisibility(View.GONE);
             holder.name.setVisibility(View.VISIBLE);
-            String fileName = FileUtils.getFileName(context, model.uri);
+            String fileName = FileUtils.getFileName(context, Uri.parse(model.uri));
             String fileExtension = FileUtils.getFileExtension(fileName);
             holder.name.setText(fileName);
         } else {
             holder.image.setVisibility(View.VISIBLE);
             holder.name.setVisibility(View.GONE);
-            Glide.with(context).load(model.uri).placeholder(R.color.white).into(holder.image);
+            Glide.with(context).load(Uri.parse(model.uri)).placeholder(R.color.white).into(holder.image);
         }
 
         holder.itemView.setOnClickListener(v -> clickListener.onClick(holder.getAbsoluteAdapterPosition()));

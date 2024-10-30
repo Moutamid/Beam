@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.moutamid.beam.notification.FCMNotificationHelper;
 import com.moutamid.beam.utilis.Stash;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -19,7 +20,6 @@ import com.moutamid.beam.adapters.ChatAdapter;
 import com.moutamid.beam.databinding.FragmentChatBinding;
 import com.moutamid.beam.models.MessageModel;
 import com.moutamid.beam.models.UserModel;
-import com.moutamid.beam.notification.FcmNotificationsSender;
 import com.moutamid.beam.utilis.Constants;
 
 import java.util.ArrayList;
@@ -122,7 +122,7 @@ public class ChatFragment extends Fragment {
 
         Constants.databaseReference().child(Constants.MESSAGES).child(chatID).child(model.id)
                 .setValue(model).addOnSuccessListener(unused -> {
-                    new FcmNotificationsSender("/topics/" + userModel.id, stash.name, m, requireContext(), requireActivity()).SendNotifications();
+                    new FCMNotificationHelper(requireContext()).sendNotification(userModel.id, stash.name, m);
                 });
     }
 }

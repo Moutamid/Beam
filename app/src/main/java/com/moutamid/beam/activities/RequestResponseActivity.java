@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -32,7 +33,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.UploadTask;
 import com.moutamid.beam.R;
-import com.moutamid.beam.adapters.CategoryAdapter;
 import com.moutamid.beam.adapters.DocumentsAdapter;
 import com.moutamid.beam.adapters.MandatoryAdapter;
 import com.moutamid.beam.databinding.ActivityRequestResponseBinding;
@@ -40,7 +40,7 @@ import com.moutamid.beam.models.DocumentLinkModel;
 import com.moutamid.beam.models.DocumentModel;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
-import com.moutamid.beam.notification.FcmNotificationsSender;
+import com.moutamid.beam.notification.FCMNotificationHelper;
 import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.FileUtils;
 import com.moutamid.beam.utilis.MicAnimation;
@@ -292,8 +292,8 @@ public class RequestResponseActivity extends AppCompatActivity {
         double progressPerDocument = 100.0 / list.size();
         if (i != list.size()) {
             DocumentModel document = list.get(i);
-            String fileName = FileUtils.getFileName(this, document.uri);
-            Constants.storageReference(Constants.auth().getCurrentUser().getUid()).child(fileName).putFile(document.uri)
+            String fileName = FileUtils.getFileName(this, Uri.parse(document.uri));
+            Constants.storageReference(Constants.auth().getCurrentUser().getUid()).child(fileName).putFile(Uri.parse(document.uri))
                     .addOnSuccessListener(taskSnapshot -> {
                         taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(uri -> {
                             documents.add(new DocumentLinkModel(uri.toString(), fileName, document.isDoc));
@@ -325,11 +325,16 @@ public class RequestResponseActivity extends AppCompatActivity {
         newRequest.timestamp = new Date().getTime();
         newRequest.userID = stash.id;
 
+        if (newRequest.deadline == 0) {
+            long currentTime = System.currentTimeMillis();
+            newRequest.deadline = currentTime + (48 * 60 * 60 * 1000);
+        }
+
         Constants.databaseReference().child(Constants.REQUESTS_REPLY).child(requestModel.ID).child(newRequest.ID).setValue(newRequest)
                 .addOnSuccessListener(unused -> {
                     Constants.dismissDialog();
                     Toast.makeText(this, "Reply Added", Toast.LENGTH_SHORT).show();
-                    new FcmNotificationsSender("/topics/" + requestModel.userID, stash.name, newRequest.title, this, this).SendNotifications();
+                    new FCMNotificationHelper(this).sendNotification(requestModel.userID, stash.name, newRequest.title);
                     getOnBackPressedDispatcher().onBackPressed();
                 }).addOnFailureListener(e -> {
                     Constants.dismissDialog();
@@ -346,10 +351,6 @@ public class RequestResponseActivity extends AppCompatActivity {
         if (binding.description.getText().toString().isEmpty()) {
             binding.description.setError("required*");
             binding.description.requestFocus();
-            return false;
-        }
-        if (newRequest.deadline == 0) {
-            Toast.makeText(this, "Deadline is required", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
@@ -463,12 +464,12 @@ public class RequestResponseActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_DOCUMENT) {
             if (resultCode == RESULT_OK && data != null) {
-                list.add(new DocumentModel(data.getData(), true));
+                list.add(new DocumentModel(data.getData().toString(), true));
                 updateView();
             }
         } else {
             if (resultCode == RESULT_OK && data != null) {
-                list.add(new DocumentModel(data.getData(), false));
+                list.add(new DocumentModel(data.getData().toString(), false));
                 updateView();
             }
         }
