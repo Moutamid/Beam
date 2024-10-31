@@ -13,8 +13,12 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.database.DataSnapshot;
 import com.moutamid.beam.R;
+import com.moutamid.beam.adapters.CategoryAdapter;
 import com.moutamid.beam.databinding.ActivitySignupBinding;
+import com.moutamid.beam.models.CategoryModel;
+import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.MicAnimation;
@@ -24,6 +28,8 @@ import com.moutamid.beam.utilis.Stash;
 
 import net.gotev.speech.Speech;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Locale;
 
 public class SignupActivity extends AppCompatActivity {
@@ -31,6 +37,7 @@ public class SignupActivity extends AppCompatActivity {
     AnimatorSet listeningAnimation;
     private SpeechRecognitionManager speechRecognitionManager;
     private static final String TAG = "SignupActivity";
+    private String[] service_categories = new String[]{};
 
     SpeechUtils speechUtils = new SpeechUtils() {
         @Override
@@ -95,9 +102,23 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
-        String[] service_categories = getResources().getStringArray(R.array.service_categories);
-        ArrayAdapter<String> subject = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, service_categories);
-        binding.categoryList.setAdapter(subject);
+        ArrayList<CategoryModel> category = new ArrayList<>();
+        Constants.databaseReference().child(Constants.CATEGORIES).get().addOnSuccessListener(snapshot -> {
+            Constants.dismissDialog();
+            if (snapshot.exists()) {
+                category.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    CategoryModel topicsModel = dataSnapshot.getValue(CategoryModel.class);
+                    category.add(topicsModel);
+                }
+                category.sort(Comparator.comparing(categoryModel -> categoryModel.name));
+                service_categories = category.stream()
+                        .map(cat -> cat.name)
+                        .toArray(String[]::new);
+                ArrayAdapter<String> subject = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, service_categories);
+                binding.categoryList.setAdapter(subject);
+            }
+        });
 
         binding.create.setOnClickListener(v -> {
             create();

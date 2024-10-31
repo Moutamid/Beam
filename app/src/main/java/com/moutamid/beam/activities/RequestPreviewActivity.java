@@ -382,6 +382,7 @@ public class RequestPreviewActivity extends AppCompatActivity {
     private void getUsers(int pos) {
         if (pos != requestList.size()) {
             RequestModel model = requestList.get(pos);
+            Log.d(TAG, "getUsers: " + model.userID);
             Constants.databaseReference().child(Constants.USER).child(model.userID).get().addOnSuccessListener(dataSnapshot -> {
                 if (dataSnapshot.exists()) {
                     UserModel user = dataSnapshot.getValue(UserModel.class);
