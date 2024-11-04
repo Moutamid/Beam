@@ -41,7 +41,7 @@ public class Constants {
     public static final String STASH_USER = "STASH_USER";
     public static final String MESSAGES = "MESSAGES";
     public static final String REQUESTS_REPLY = "REQUESTS_REPLY";
-    public static final String ADMIN_ID = "M73yeCumpcZml9SE08M9trlBRaF2";
+    public static final String ADMIN_ID = "M73yeCumpcZml9SE08M9trlBRaF2"; // M73yeCumpcZml9SE08M9trlBRaF2
     public static Dialog dialog;
 
     public static void initDialog(Context context) {

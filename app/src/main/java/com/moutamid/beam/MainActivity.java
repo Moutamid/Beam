@@ -200,35 +200,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         });
 
-        ArrayList<CategoryModel> category = new ArrayList<>();
-        Constants.databaseReference().child(Constants.CATEGORIES).get().addOnSuccessListener(snapshot -> {
-            Constants.dismissDialog();
-            if (snapshot.exists()) {
-                category.clear();
-                category.add(0, new CategoryModel("ALL", "All"));
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    CategoryModel topicsModel = dataSnapshot.getValue(CategoryModel.class);
-                    category.add(topicsModel);
-                }
-                category.sort(Comparator.comparing(categoryModel -> categoryModel.name));
-                CategoryAdapter categoryAdapter = new CategoryAdapter(this, category, query -> {
-                    if (adapter != null) {
-                        if (query.equals("All")) adapter.getFilter().filter("");
-                        else adapter.getFilter().filter(query);
-
-                        if (adapter.getItemCount() == 0) {
-                            binding.noLayout.setVisibility(View.VISIBLE);
-                            binding.recycler.setVisibility(View.GONE);
-                        } else {
-                            binding.noLayout.setVisibility(View.GONE);
-                            binding.recycler.setVisibility(View.VISIBLE);
-                        }
-                    }
-                }, false);
-                binding.categoryRC.setAdapter(categoryAdapter);
-            }
-        });
-
         requestMissingPermissions();
 
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
@@ -426,7 +397,35 @@ public class MainActivity extends AppCompatActivity {
                     });
         }
 
-        getList();
+        ArrayList<CategoryModel> category = new ArrayList<>();
+        Constants.databaseReference().child(Constants.CATEGORIES).get().addOnSuccessListener(snapshot -> {
+            Constants.dismissDialog();
+            if (snapshot.exists()) {
+                category.clear();
+                category.add(0, new CategoryModel("ALL", "All"));
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    CategoryModel topicsModel = dataSnapshot.getValue(CategoryModel.class);
+                    category.add(topicsModel);
+                }
+                category.sort(Comparator.comparing(categoryModel -> categoryModel.name));
+                CategoryAdapter categoryAdapter = new CategoryAdapter(this, category, query -> {
+                    if (adapter != null) {
+                        if (query.equals("All")) adapter.getFilter().filter("");
+                        else adapter.getFilter().filter(query);
+
+                        if (adapter.getItemCount() == 0) {
+                            binding.noLayout.setVisibility(View.VISIBLE);
+                            binding.recycler.setVisibility(View.GONE);
+                        } else {
+                            binding.noLayout.setVisibility(View.GONE);
+                            binding.recycler.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }, false);
+                binding.categoryRC.setAdapter(categoryAdapter);
+                getList();
+            }
+        });
     }
 
     private void getList() {
