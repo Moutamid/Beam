@@ -49,7 +49,11 @@ public class LoginActivity extends AppCompatActivity {
                 binding.phone.getEditText().requestFocus();
             } else {
                 if (binding.phone.getEditText().hasFocus()) {
-                    binding.phone.getEditText().setText(result.replace(" ", "").replace("-", ""));
+                    String cleanedResult = result.replace(" ", "").replace("-", "");
+                    if (cleanedResult.matches("\\d+")) { // Check if the string contains only digits
+                        binding.phone.getEditText().append(cleanedResult);
+                    }
+//                    binding.phone.getEditText().append(result.replace(" ", "").replace("-", ""));
                 }
             }
         }

@@ -220,7 +220,7 @@ public class NewRequestActivity extends AppCompatActivity {
     private void sendNotifications() {
         ArrayList<UserModel> list = Stash.getArrayList(Constants.REQUESTERS, UserModel.class);
         for (UserModel user : list) {
-            new FCMNotificationHelper(this).sendNotification(user.id, user.name, newRequest.description);
+            new FCMNotificationHelper(this).sendNotification(user.id, user.name, newRequest.description, newRequest.ID, newRequest.userID, "null");
         }
         Constants.dismissDialog();
         Toast.makeText(this, "Request Added", Toast.LENGTH_SHORT).show();

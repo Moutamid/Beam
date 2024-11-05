@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class FCMNotificationHelper {
-    private static final String TAG = "NotificationHelper";
+    private static final String TAG = "SplashActivity";
     private static final String FCM_API_URL = "https://fcm.googleapis.com/v1/projects/multistreamz-10cba/messages:send";
     private static String AUTHORIZATION_HEADER = "Bearer ";  // make sure you put a space after bearer
 
@@ -31,10 +31,10 @@ public class FCMNotificationHelper {
         this.context = context;
     }
 
-    public void sendNotification(String receiverId, String title, String body) {
+    public void sendNotification(String receiverId, String title, String body, String requestID, String requesterID, String userID) {
         TokenManager tokenManager = new TokenManager(context);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-
+        Log.d(TAG, "sendNotification: " + userID);
         // Submit the task to the executor service
         Future<String> futureToken = executorService.submit(() -> {
             try {
@@ -55,7 +55,7 @@ public class FCMNotificationHelper {
                     getReceiverToken(receiverId, token -> {
                         if (token != null) {
                             Log.d(TAG, "sendNotification: TOKEN " + token);
-                            sendFCMNotification(token, title, body);
+                            sendFCMNotification(token, title, body, requestID, requesterID, userID);
                         } else {
                             Log.e(TAG, "Failed to retrieve FCM token for user: " + receiverId);
                         }
@@ -85,18 +85,25 @@ public class FCMNotificationHelper {
         });
     }
 
-    private void sendFCMNotification(String token, String title, String body) {
+    private void sendFCMNotification(String token, String title, String body,String requestID, String requesterID, String userID) {
         RequestQueue queue = Volley.newRequestQueue(context);
-
+        Log.d(TAG, "sendFCMNotification: FINAL " + userID);
         JSONObject jsonBody = new JSONObject();
         try {
             JSONObject message = new JSONObject();
             JSONObject notification = new JSONObject();
+            JSONObject data = new JSONObject();
+
             notification.put("title", title);
             notification.put("body", body);
 
+            data.put("requestID", requestID);
+            data.put("requesterID", requesterID);
+            data.put("userID", userID);
+
             message.put("token", token);
             message.put("notification", notification);
+            message.put("data", data);
             jsonBody.put("message", message);
         } catch (JSONException e) {
             e.printStackTrace();

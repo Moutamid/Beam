@@ -61,7 +61,10 @@ public class SignupActivity extends AppCompatActivity {
                     binding.name.getEditText().setText(result);
                 }
                 if (binding.phone.getEditText().hasFocus()) {
-                    binding.phone.getEditText().setText(result.replace(" ", "").replace("-", ""));
+                    String cleanedResult = result.replace(" ", "").replace("-", "");
+                    if (cleanedResult.matches("\\d+")) { // Check if the string contains only digits
+                        binding.phone.getEditText().append(cleanedResult);
+                    }
                 }
             }
         }
@@ -104,7 +107,6 @@ public class SignupActivity extends AppCompatActivity {
 
         ArrayList<CategoryModel> category = new ArrayList<>();
         Constants.databaseReference().child(Constants.CATEGORIES).get().addOnSuccessListener(snapshot -> {
-            Constants.dismissDialog();
             if (snapshot.exists()) {
                 category.clear();
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {

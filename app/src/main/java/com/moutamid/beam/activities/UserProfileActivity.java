@@ -143,7 +143,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 binding.distance.setText(Constants.formatDistance(distance));
 
                 if (userID.equals(Constants.ADMIN_ID)) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel)).commit();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel, REQUEST_ID, REQUESTER_ID)).commit();
                 } else {
                     LatLng currentLatLng = new LatLng(userModel.location.lat, userModel.location.log);
                     getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new MapFragment(currentLatLng)).commit();
@@ -249,12 +249,12 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void chat() {
-        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel)).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel, REQUEST_ID, REQUESTER_ID)).commit();
     }
 
     private void attachRating() {
         if (userID.equals(Constants.auth().getCurrentUser().getUid())) {
-            Toast.makeText(this, "You cant rate yourself", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You can't rate yourself", Toast.LENGTH_SHORT).show();
         } else showRatingDialog();
     }
 

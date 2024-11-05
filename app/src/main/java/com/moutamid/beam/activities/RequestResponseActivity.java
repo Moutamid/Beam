@@ -97,10 +97,10 @@ public class RequestResponseActivity extends AppCompatActivity {
                 send();
             } else {
                 if (binding.tit.getEditText().hasFocus()) {
-                    binding.tit.getEditText().setText(result.replace(" ", "").replace("-", ""));
+                    binding.tit.getEditText().append(result.replace(" ", "").replace("-", ""));
                 }
                 if (binding.description.hasFocus()) {
-                    binding.description.setText(result.replace(" ", "").replace("-", ""));
+                    binding.description.append(result.replace(" ", "").replace("-", ""));
                 }
             }
         }
@@ -136,6 +136,11 @@ public class RequestResponseActivity extends AppCompatActivity {
 
         requestModel = (RequestModel) Stash.getObject(Constants.PASS_REQUEST, RequestModel.class);
         stash = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
+
+        if (requestModel.mandatory != null) {
+            MandatoryAdapter adapter = new MandatoryAdapter(this, requestModel.mandatory);
+            binding.mandatoryRequester.setAdapter(adapter);
+        }
 
         Glide.with(RequestResponseActivity.this).load(stash.image).placeholder(R.drawable.profile_icon).into(binding.profileImage);
 
@@ -334,7 +339,8 @@ public class RequestResponseActivity extends AppCompatActivity {
                 .addOnSuccessListener(unused -> {
                     Constants.dismissDialog();
                     Toast.makeText(this, "Reply Added", Toast.LENGTH_SHORT).show();
-                    new FCMNotificationHelper(this).sendNotification(requestModel.userID, stash.name, newRequest.title);
+                    Log.d(TAG, "uploadModel: " + requestModel.userID);
+                    new FCMNotificationHelper(this).sendNotification(requestModel.userID, stash.name, newRequest.title, requestModel.ID, requestModel.userID, "null");
                     getOnBackPressedDispatcher().onBackPressed();
                 }).addOnFailureListener(e -> {
                     Constants.dismissDialog();
@@ -353,6 +359,17 @@ public class RequestResponseActivity extends AppCompatActivity {
             binding.description.requestFocus();
             return false;
         }
+
+        if (!requestModel.mandatory.isEmpty()) {
+            if (newRequest.mandatory == null) {
+                Toast.makeText(this, "Mandatory fields are required", Toast.LENGTH_SHORT).show();
+                return false;
+            } else if (newRequest.mandatory.isEmpty()) {
+                Toast.makeText(this, "Mandatory fields are required", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+
         return true;
     }
 

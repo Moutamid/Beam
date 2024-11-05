@@ -1,6 +1,7 @@
 package com.moutamid.beam.activities;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -66,6 +67,9 @@ public class ActiveOrdersActivity extends AppCompatActivity {
                         }
                         if (!orders.isEmpty()) {
                             list = new ArrayList<>();
+                            adapter = new ActiveOrdersAdapter(ActiveOrdersActivity.this, list);
+                            binding.recycler.setAdapter(adapter);
+                            Log.d(TAG, "orders.size: " + orders.size());
                             getOrders(0);
                         }
                     }
@@ -78,8 +82,10 @@ public class ActiveOrdersActivity extends AppCompatActivity {
                 });
     }
 
+    private static final String TAG = "ActiveOrdersActivity";
     private void getOrders(int i) {
         OrderModel order = orders.get(i);
+        Log.d(TAG, "getOrders: " + order.requestID);
         Constants.databaseReference().child(Constants.REQUESTS_REPLY).child(order.requestID)
                 .get().addOnSuccessListener(snapshot -> {
                     if (snapshot.exists()) {

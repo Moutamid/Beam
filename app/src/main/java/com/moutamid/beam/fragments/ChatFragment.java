@@ -35,13 +35,16 @@ public class ChatFragment extends Fragment {
     UserModel userModel;
     String chatID;
     UserModel stash;
+    String REQUEST_ID, REQUESTER_ID;
 
     public ChatFragment() {
         // Required empty public constructor
     }
 
-    public ChatFragment(UserModel userModel) {
+    public ChatFragment(UserModel userModel, String REQUEST_ID, String REQUESTER_ID) {
         this.userModel = userModel;
+        this.REQUEST_ID = REQUEST_ID;
+        this.REQUESTER_ID = REQUESTER_ID;
     }
 
     @Override
@@ -122,7 +125,7 @@ public class ChatFragment extends Fragment {
 
         Constants.databaseReference().child(Constants.MESSAGES).child(chatID).child(model.id)
                 .setValue(model).addOnSuccessListener(unused -> {
-                    new FCMNotificationHelper(requireContext()).sendNotification(userModel.id, stash.name, m);
+                    new FCMNotificationHelper(requireContext()).sendNotification(userModel.id, stash.name, m, REQUEST_ID, REQUESTER_ID, stash.id);
                 });
     }
 }

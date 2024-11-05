@@ -36,6 +36,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         Log.d("ContentValues", "onNewToken: " + s);
     }
 
+    private static final String TAG = "SplashActivity";
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
@@ -52,8 +53,20 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         NotificationCompat.Builder builder = new NotificationCompat.Builder((Context) this, yourChannelId);
 
         builder.setSmallIcon(R.drawable.beam_circle);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 1, new Intent(this, SplashActivity.class),
-                PendingIntent.FLAG_IMMUTABLE);//134217728
+        String requestID = remoteMessage.getData().get("requestID");
+        String requesterID = remoteMessage.getData().get("requesterID");
+        String userID = remoteMessage.getData().get("userID");
+
+        Log.d(TAG, "onMessageReceived  requestID: " + requestID);
+        Log.d(TAG, "onMessageReceived  requesterID: " + requesterID);
+        Log.d(TAG, "onMessageReceived  userID: " + userID);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 1, new Intent(this, SplashActivity.class)
+                        .putExtra("userID", userID)
+                        .putExtra("requestID", requestID)
+                        .putExtra("requesterID", requesterID),
+                PendingIntent.FLAG_MUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
+
         builder.setContentTitle(remoteMessage.getNotification().getTitle());
         builder.setContentText(remoteMessage.getNotification().getBody());
         builder.setContentIntent(pendingIntent);

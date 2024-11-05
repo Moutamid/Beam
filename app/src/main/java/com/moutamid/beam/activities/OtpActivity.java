@@ -65,7 +65,11 @@ public class OtpActivity extends AppCompatActivity {
                 binding.otp.getEditText().requestFocus();
             } else {
                 if (binding.otp.getEditText().hasFocus()) {
-                    binding.otp.getEditText().setText(result.replace(" ", "").replace("-", ""));
+                    String cleanedResult = result.replace(" ", "").replace("-", "");
+                    if (cleanedResult.matches("\\d+")) { // Check if the string contains only digits
+                        binding.otp.getEditText().append(cleanedResult);
+                    }
+                    //binding.otp.getEditText().append(result.replace(" ", "").replace("-", ""));
                 }
             }
         }
