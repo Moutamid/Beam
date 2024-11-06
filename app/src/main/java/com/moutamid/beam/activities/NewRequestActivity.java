@@ -88,9 +88,7 @@ public class NewRequestActivity extends AppCompatActivity {
         });
 
         documents = new ArrayList<>();
-        list = Stash.getArrayList(Constants.DOCUMENTS, DocumentModel.class);
 
-        newRequest = (RequestModel) Stash.getObject(Constants.SAVE_REQUEST, RequestModel.class);
 
         binding.toolbar.back.setOnClickListener(v -> {
             Stash.clear(Constants.SAVE_REQUEST);
@@ -114,6 +112,8 @@ public class NewRequestActivity extends AppCompatActivity {
 
 
     private void send() {
+        list = Stash.getArrayList(Constants.DOCUMENTS, DocumentModel.class);
+        newRequest = (RequestModel) Stash.getObject(Constants.SAVE_REQUEST, RequestModel.class);
         if (valid()) {
             if (list.isEmpty()) {
                 uploadModel();
@@ -205,6 +205,7 @@ public class NewRequestActivity extends AppCompatActivity {
     private void uploadModel() {
         Constants.showDialog();
         newRequest.documents = new ArrayList<>(documents);
+        Log.d(TAG, "uploadModel: documents " + newRequest.documents.size());
         newRequest.ID = UUID.randomUUID().toString();
         newRequest.timestamp = new Date().getTime();
         newRequest.userID = userModel.id;
