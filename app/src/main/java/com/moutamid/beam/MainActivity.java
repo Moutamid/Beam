@@ -411,16 +411,22 @@ public class MainActivity extends AppCompatActivity {
                 category.sort(Comparator.comparing(categoryModel -> categoryModel.name));
                 CategoryAdapter categoryAdapter = new CategoryAdapter(this, category, query -> {
                     if (adapter != null) {
+                        Constants.showDialog();
                         if (query.equals("All")) adapter.getFilter().filter("");
                         else adapter.getFilter().filter(query);
 
-                        if (adapter.getItemCount() == 0) {
-                            binding.noLayout.setVisibility(View.VISIBLE);
-                            binding.recycler.setVisibility(View.GONE);
-                        } else {
-                            binding.noLayout.setVisibility(View.GONE);
-                            binding.recycler.setVisibility(View.VISIBLE);
-                        }
+                        new Handler().postDelayed(() -> {
+                            runOnUiThread(() -> {
+                                Constants.dismissDialog();
+                                if (adapter.getItemCount() == 0) {
+                                    binding.noLayout.setVisibility(View.VISIBLE);
+                                    binding.recycler.setVisibility(View.GONE);
+                                } else {
+                                    binding.noLayout.setVisibility(View.GONE);
+                                    binding.recycler.setVisibility(View.VISIBLE);
+                                }
+                            });
+                        }, 1000);
                     }
                 }, false);
                 binding.categoryRC.setAdapter(categoryAdapter);

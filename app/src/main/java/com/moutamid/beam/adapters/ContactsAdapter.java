@@ -25,7 +25,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     UserModel currentUser;
 
     public interface ContactListener {
-        void onClick(String userID);
+        void onClick(String userID, int pos);
     }
 
     ContactListener listener;
@@ -66,7 +66,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
 
         if (listener != null) {
             holder.itemView.setOnClickListener(v -> {
-                listener.onClick(userModel.id);
+                listener.onClick(userModel.id, holder.getAbsoluteAdapterPosition());
             });
         }
     }

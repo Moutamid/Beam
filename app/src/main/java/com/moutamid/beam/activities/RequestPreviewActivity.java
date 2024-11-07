@@ -408,8 +408,8 @@ public class RequestPreviewActivity extends AppCompatActivity {
                 binding.noContact.setVisibility(View.GONE);
                 binding.contactRC.setVisibility(View.VISIBLE);
             }
-            ContactsAdapter adapter = new ContactsAdapter(RequestPreviewActivity.this, usersList, userID -> {
-                showData(userID);
+            ContactsAdapter adapter = new ContactsAdapter(RequestPreviewActivity.this, usersList, (userID, position) -> {
+                showData(userID, position);
             });
             binding.contactRC.setAdapter(adapter);
         }
@@ -418,9 +418,10 @@ public class RequestPreviewActivity extends AppCompatActivity {
     public String passID = "";
     public String REQUESTER_ID = "";
 
-    private void showData(String userID) {
+    private void showData(String userID, int position) {
         binding.replyLayout.setVisibility(View.VISIBLE);
-        RequestModel model = requestList.stream().filter(requestModel1 -> requestModel1.userID.equals(userID)).findFirst().get();
+//        RequestModel model = requestList.stream().filter(requestModel1 -> requestModel1.userID.equals(userID)).findFirst().get();
+        RequestModel model = requestList.get(position);
 
         binding.replyTitle.setText(model.title);
         binding.replyDescription.setText(model.description);

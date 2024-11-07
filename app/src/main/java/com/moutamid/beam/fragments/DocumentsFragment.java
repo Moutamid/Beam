@@ -184,7 +184,7 @@ public class DocumentsFragment extends Fragment {
                 binding.contactRC.setVisibility(View.VISIBLE);
             }
             Stash.put(Constants.REQUESTERS, usersList);
-            ContactsAdapter adapter = new ContactsAdapter(requireContext(), usersList, userID -> {
+            ContactsAdapter adapter = new ContactsAdapter(requireContext(), usersList, (userID, position) -> {
                 startActivity(new Intent(requireContext(), UserProfileActivity.class)
                         .putExtra("USER_ID", userID)
                         .putExtra("REQUESTER_ID", "")
