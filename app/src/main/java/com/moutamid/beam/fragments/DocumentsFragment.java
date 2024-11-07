@@ -27,6 +27,7 @@ import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
 import com.moutamid.beam.activities.NewRequestActivity;
+import com.moutamid.beam.activities.UserProfileActivity;
 import com.moutamid.beam.adapters.ContactsAdapter;
 import com.moutamid.beam.adapters.DocumentsAdapter;
 import com.moutamid.beam.adapters.MandatoryAdapter;
@@ -183,7 +184,14 @@ public class DocumentsFragment extends Fragment {
                 binding.contactRC.setVisibility(View.VISIBLE);
             }
             Stash.put(Constants.REQUESTERS, usersList);
-            ContactsAdapter adapter = new ContactsAdapter(requireContext(), usersList, null);
+            ContactsAdapter adapter = new ContactsAdapter(requireContext(), usersList, userID -> {
+                startActivity(new Intent(requireContext(), UserProfileActivity.class)
+                        .putExtra("USER_ID", userID)
+                        .putExtra("REQUESTER_ID", "")
+                        .putExtra("REQUEST_ID", "")
+                        .putExtra("PREVIEW", true)
+                );
+            });
             binding.contactRC.setAdapter(adapter);
         });
 

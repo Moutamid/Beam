@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 
 import com.google.firebase.database.DataSnapshot;
 import com.moutamid.beam.models.RequestModel;
+import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
 import com.moutamid.beam.utilis.Stash;
 
@@ -36,6 +37,18 @@ public class MyApp extends Application implements Application.ActivityLifecycleC
     @Override
     public void onActivityStarted(@NonNull Activity activity) {
         checkDeadline();
+        if (Constants.auth().getCurrentUser() != null)
+            saveData();
+    }
+
+    private void saveData() {
+        Constants.databaseReference().child(Constants.USER).child(Constants.auth().getCurrentUser().getUid()).get()
+                .addOnSuccessListener(dataSnapshot -> {
+                    if (dataSnapshot.exists()) {
+                        UserModel userModel = dataSnapshot.getValue(UserModel.class);
+                        Stash.put(Constants.STASH_USER, userModel);
+                    }
+                });
     }
 
     private void checkDeadline() {

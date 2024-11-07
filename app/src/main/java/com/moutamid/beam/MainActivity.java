@@ -398,6 +398,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ArrayList<CategoryModel> category = new ArrayList<>();
+        Constants.showDialog();
         Constants.databaseReference().child(Constants.CATEGORIES).get().addOnSuccessListener(snapshot -> {
             Constants.dismissDialog();
             if (snapshot.exists()) {
@@ -429,7 +430,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getList() {
-        Constants.showDialog();
         Constants.databaseReference().child(Constants.REQUESTS)
                 .addValueEventListener(new ValueEventListener() {
                     @Override

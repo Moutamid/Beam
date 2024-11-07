@@ -22,7 +22,6 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.moutamid.beam.R;
@@ -101,11 +100,20 @@ public class UserProfileActivity extends AppCompatActivity {
         REQUEST_ID = getIntent().getStringExtra("REQUEST_ID");
         REQUESTER_ID = getIntent().getStringExtra("REQUESTER_ID");
 
+        boolean PREVIEW = getIntent().getBooleanExtra("PREVIEW", false);
+
+        Log.d("SplashActivity", "PREVIEW: " + PREVIEW);
+
+        if (PREVIEW) {
+            binding.map.setVisibility(View.GONE);
+            binding.activeClose.setVisibility(View.GONE);
+        } else {
+            checkOrder();
+        }
+
         Log.d(TAG, "userID: " + userID);
         Log.d(TAG, "REQUEST_ID: " + REQUEST_ID);
         Log.d(TAG, "REQUESTER_ID: " + REQUESTER_ID);
-
-        checkOrder();
 
         Constants.databaseReference().child(Constants.USER).child(userID).get().addOnSuccessListener(dataSnapshot -> {
             if (dataSnapshot.exists()) {
@@ -142,20 +150,26 @@ public class UserProfileActivity extends AppCompatActivity {
                 double distance = Constants.calculateDistance(stash.location.lat, stash.location.log, userModel.location.lat, userModel.location.log);
                 binding.distance.setText(Constants.formatDistance(distance));
 
-                if (userID.equals(Constants.ADMIN_ID)) {
+                if (PREVIEW) {
                     getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel, REQUEST_ID, REQUESTER_ID)).commit();
                 } else {
-                    LatLng currentLatLng = new LatLng(userModel.location.lat, userModel.location.log);
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new MapFragment(currentLatLng)).commit();
+                    if (userID.equals(Constants.ADMIN_ID)) {
+                        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel, REQUEST_ID, REQUESTER_ID)).commit();
+                    } else {
+                        LatLng currentLatLng = new LatLng(userModel.location.lat, userModel.location.log);
+                        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new MapFragment(currentLatLng)).commit();
+                    }
                 }
             }
         }).addOnFailureListener(e -> {
             Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
         });
 
-        if (userID.equals(Constants.ADMIN_ID)) {
-            binding.map.setVisibility(View.GONE);
-        } else binding.map.setVisibility(View.VISIBLE);
+        if (!PREVIEW) {
+            if (userID.equals(Constants.ADMIN_ID)) {
+                binding.map.setVisibility(View.GONE);
+            } else binding.map.setVisibility(View.VISIBLE);
+        }
 
         binding.map.setOnClickListener(v -> {
             showMap();
@@ -220,6 +234,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     OrderModel order;
+
     private void activeOrder() {
         order = new OrderModel();
         order.setId(UUID.randomUUID().toString());

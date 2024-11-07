@@ -55,22 +55,24 @@ public class ActiveOrdersActivity extends AppCompatActivity {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        orders = new ArrayList<>();
-                        if (snapshot.exists()) {
-                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                OrderModel orderModel = dataSnapshot.getValue(OrderModel.class);
-                                orders.add(orderModel);
+                        if (!isDestroyed() && !isFinishing()) {
+                            orders = new ArrayList<>();
+                            if (snapshot.exists()) {
+                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                    OrderModel orderModel = dataSnapshot.getValue(OrderModel.class);
+                                    orders.add(orderModel);
+                                }
+                            } else {
+                                Constants.dismissDialog();
+                                Toast.makeText(ActiveOrdersActivity.this, "No Data Found", Toast.LENGTH_SHORT).show();
                             }
-                        } else {
-                            Constants.dismissDialog();
-                            Toast.makeText(ActiveOrdersActivity.this, "No Data Found", Toast.LENGTH_SHORT).show();
-                        }
-                        if (!orders.isEmpty()) {
-                            list = new ArrayList<>();
-                            adapter = new ActiveOrdersAdapter(ActiveOrdersActivity.this, list);
-                            binding.recycler.setAdapter(adapter);
-                            Log.d(TAG, "orders.size: " + orders.size());
-                            getOrders(0);
+                            if (!orders.isEmpty()) {
+                                list = new ArrayList<>();
+                                adapter = new ActiveOrdersAdapter(ActiveOrdersActivity.this, list);
+                                binding.recycler.setAdapter(adapter);
+                                Log.d(TAG, "orders.size: " + orders.size());
+                                getOrders(0);
+                            }
                         }
                     }
 
@@ -95,13 +97,21 @@ public class ActiveOrdersActivity extends AppCompatActivity {
                             if (requestModel.userID.equals(order.userID)) list.add(requestModel);
                         }
                         if (i == orders.size() - 1) {
-                            Constants.dismissDialog();
-                            adapter = new ActiveOrdersAdapter(ActiveOrdersActivity.this, list);
-                            binding.recycler.setAdapter(adapter);
+                            if (!isDestroyed() && !isFinishing()) {
+                                Constants.dismissDialog();
+                                adapter = new ActiveOrdersAdapter(ActiveOrdersActivity.this, list);
+                                binding.recycler.setAdapter(adapter);
+                            }
                         } else getOrders(i + 1);
                     } else {
                         Constants.dismissDialog();
                     }
                 });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        adapter.destroy();
     }
 }

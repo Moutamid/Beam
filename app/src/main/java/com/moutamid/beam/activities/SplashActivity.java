@@ -66,7 +66,15 @@ public class SplashActivity extends AppCompatActivity {
                         startActivity(new Intent(SplashActivity.this, UserProfileActivity.class)
                                 .putExtra("REQUESTER_ID", requesterID)
                                 .putExtra("REQUEST_ID", requestID)
-                                .putExtra("USER_ID", userID));
+                                .putExtra("USER_ID", userID)
+                                .putExtra("PREVIEW", false));
+                        finish();
+                    } else if (requestID.isEmpty()) {
+                        startActivity(new Intent(SplashActivity.this, UserProfileActivity.class)
+                                .putExtra("REQUESTER_ID", requesterID)
+                                .putExtra("REQUEST_ID", requestID)
+                                .putExtra("USER_ID", userID)
+                                .putExtra("PREVIEW", true));
                         finish();
                     } else {
                         startHandler();

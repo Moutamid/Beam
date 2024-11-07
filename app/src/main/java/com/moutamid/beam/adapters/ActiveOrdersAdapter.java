@@ -7,8 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,26 +18,28 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.moutamid.beam.R;
-import com.moutamid.beam.activities.RequestPreviewActivity;
 import com.moutamid.beam.activities.UserProfileActivity;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.models.UserModel;
 import com.moutamid.beam.utilis.Constants;
-import com.moutamid.beam.utilis.Stash;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Locale;
 
 public class ActiveOrdersAdapter extends RecyclerView.Adapter<ActiveOrdersAdapter.RequestVH> {
     Context context;
     ArrayList<RequestModel> list;
     private static final String TAG = "RequestsAdapter";
+    boolean isDestroy = false;
 
     public ActiveOrdersAdapter(Context context, ArrayList<RequestModel> list) {
         this.context = context;
         this.list = list;
+    }
+
+    public void destroy() {
+        isDestroy = true;
     }
 
     @NonNull
@@ -63,7 +63,10 @@ public class ActiveOrdersAdapter extends RecyclerView.Adapter<ActiveOrdersAdapte
                         UserModel userModel = snapshot.getValue(UserModel.class);
                         Log.d(TAG, "onDataChange: " + userModel.isAnonymous);
                         holder.name.setText(userModel.name);
-                        Glide.with(context).load(userModel.image).placeholder(R.drawable.profile_icon).into(holder.image);
+
+                        Log.d(TAG, "isDestroy: " + isDestroy);
+                        if (!isDestroy)
+                            Glide.with(context).load(userModel.image).placeholder(R.drawable.profile_icon).into(holder.image);
 
                         if (userModel.status) {
                             holder.status.setBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.green)));
