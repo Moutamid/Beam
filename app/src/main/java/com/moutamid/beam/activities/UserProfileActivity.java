@@ -53,7 +53,8 @@ public class UserProfileActivity extends AppCompatActivity {
     boolean isActive = false;
     AnimatorSet listeningAnimation;
     private SpeechRecognitionManager speechRecognitionManager;
-
+    private boolean isChatOpen = false;
+    ChatFragment chatFragment;
     SpeechUtils speechUtils = new SpeechUtils() {
         @Override
         public void onResult(String result) {
@@ -75,6 +76,15 @@ public class UserProfileActivity extends AppCompatActivity {
             } else if (result.toLowerCase(Locale.ROOT).contains("call user")) {
                 Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + userModel.phoneNumber));
                 startActivity(intent);
+            } else if (isChatOpen) {
+                if (result.toLowerCase(Locale.ROOT).contains("send")) {
+                    if (!chatFragment.message.getText().toString().isEmpty()) {
+                        chatFragment.sendMessage();
+                    }
+                } else {
+                    chatFragment.message.append(result + " ");
+                    chatFragment.message.setSelection(chatFragment.message.getText().length());
+                }
             }
         }
 
@@ -151,13 +161,12 @@ public class UserProfileActivity extends AppCompatActivity {
                 binding.distance.setText(Constants.formatDistance(distance));
 
                 if (PREVIEW) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel, REQUEST_ID, REQUESTER_ID)).commit();
+                    chat();
                 } else {
                     if (userID.equals(Constants.ADMIN_ID)) {
-                        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel, REQUEST_ID, REQUESTER_ID)).commit();
+                        chat();
                     } else {
-                        LatLng currentLatLng = new LatLng(userModel.location.lat, userModel.location.log);
-                        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new MapFragment(currentLatLng)).commit();
+                        showMap();
                     }
                 }
             }
@@ -264,7 +273,9 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void chat() {
-        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new ChatFragment(userModel, REQUEST_ID, REQUESTER_ID)).commit();
+        isChatOpen = true;
+        chatFragment = new ChatFragment(userModel, REQUEST_ID, REQUESTER_ID);
+        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, chatFragment).commit();
     }
 
     private void attachRating() {
@@ -274,6 +285,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void showMap() {
+        isChatOpen = false;
         LatLng currentLatLng = new LatLng(userModel.location.lat, userModel.location.log);
         getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new MapFragment(currentLatLng)).commit();
     }

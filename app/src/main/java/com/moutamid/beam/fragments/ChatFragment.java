@@ -10,7 +10,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.moutamid.beam.notification.FCMNotificationHelper;
 import com.moutamid.beam.utilis.Stash;
 import com.google.firebase.database.ChildEventListener;
@@ -37,6 +39,8 @@ public class ChatFragment extends Fragment {
     UserModel stash;
     String REQUEST_ID, REQUESTER_ID;
 
+    public EditText message;
+
     public ChatFragment() {
         // Required empty public constructor
     }
@@ -53,6 +57,8 @@ public class ChatFragment extends Fragment {
         binding = FragmentChatBinding.inflate(getLayoutInflater(), container, false);
 
         list = new ArrayList<>();
+
+        message = binding.message;
 
         stash = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
 
@@ -113,7 +119,7 @@ public class ChatFragment extends Fragment {
         return binding.getRoot();
     }
 
-    private void sendMessage() {
+    public void sendMessage() {
         String m = binding.message.getText().toString().trim();
         binding.message.setText("");
         MessageModel model = new MessageModel();

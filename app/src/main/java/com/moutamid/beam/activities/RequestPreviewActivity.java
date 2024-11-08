@@ -292,6 +292,14 @@ public class RequestPreviewActivity extends AppCompatActivity {
                 return "image/jpeg";
             case "txt":
                 return "text/plain";
+            case "mp4":
+                return "video/mp4";
+            case "avi":
+                return "video/x-msvideo";
+            case "mov":
+                return "video/quicktime";
+            case "mkv":
+                return "video/x-matroska";
             default:
                 return null;
         }

@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.POST_NOTIFICATIONS,
                     Manifest.permission.READ_MEDIA_IMAGES,
                     Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.READ_MEDIA_AUDIO,
                     Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
             };
@@ -95,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
                             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -111,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
                 shouldShowRequestPermissionRationale(Manifest.permission.VIBRATE);
+                shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE);
                 shouldShowRequestPermissionRationale(Manifest.permission.WAKE_LOCK);
 
                 ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
@@ -123,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                     Manifest.permission.VIBRATE,
                     Manifest.permission.WAKE_LOCK,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.POST_NOTIFICATIONS,
                     Manifest.permission.READ_MEDIA_IMAGES,
                     Manifest.permission.READ_MEDIA_VIDEO,
@@ -133,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
                     ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -144,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES);
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_VIDEO);
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_AUDIO);
+                shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE);
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -157,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.RECORD_AUDIO,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                     Manifest.permission.VIBRATE,
                     Manifest.permission.WAKE_LOCK,
@@ -166,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
             if (
                     ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
@@ -173,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
             ) {
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
+                shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE);
                 shouldShowRequestPermissionRationale(Manifest.permission.VIBRATE);
                 shouldShowRequestPermissionRationale(Manifest.permission.WAKE_LOCK);
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE);

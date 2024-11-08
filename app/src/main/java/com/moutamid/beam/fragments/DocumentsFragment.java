@@ -55,7 +55,7 @@ public class DocumentsFragment extends Fragment {
     private static final int PICK_DOCUMENT = 1003;
     RequestModel requestModel;
     ArrayList<DocumentModel> list;
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE = 20 * 1024 * 1024;
 
     private static final String TAG = "DocumentsFragment";
 
@@ -105,9 +105,9 @@ public class DocumentsFragment extends Fragment {
                         Uri fileUri = result.getData().getData();
                         if (fileUri != null) {
                             try {
-                                // Determine if file size exceeds the 10 MB limit
+                                // Determine if file size exceeds the 20 MB limit
                                 if (getFileSize(fileUri) > MAX_FILE_SIZE) {
-                                    showToast("File size must be less than 10 MB");
+                                    showToast("File size must be less than 20 MB");
                                 } else {
                                     list.add(new DocumentModel(fileUri.toString(), true));
                                     updateView();
@@ -127,9 +127,9 @@ public class DocumentsFragment extends Fragment {
                         Uri fileUri = result.getData().getData();
                         if (fileUri != null) {
                             try {
-                                // Determine if file size exceeds the 10 MB limit
+                                // Determine if file size exceeds the 20 MB limit
                                 if (getFileSize(fileUri) > MAX_FILE_SIZE) {
-                                    showToast("File size must be less than 10 MB");
+                                    showToast("File size must be less than 20 MB");
                                 } else {
                                     list.add(new DocumentModel(fileUri.toString(), false));
                                     updateView();
@@ -149,7 +149,7 @@ public class DocumentsFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentDocumentsBinding.inflate(getLayoutInflater(), container, false);
 
-        list = new ArrayList<>();
+        list = Stash.getArrayList(Constants.DOCUMENTS, DocumentModel.class);
 
         requestModel = (RequestModel) Stash.getObject(Constants.SAVE_REQUEST, RequestModel.class);
         ArrayList<UserModel> usersList = new ArrayList<>();
