@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -204,6 +206,27 @@ public class UserProfileActivity extends AppCompatActivity {
                 speechRecognitionManager.stopListening();
             }
         });
+
+        binding.main.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Rect r = new Rect();
+                binding.main.getWindowVisibleDisplayFrame(r);
+                int screenHeight = binding.main.getRootView().getHeight();
+                int keypadHeight = screenHeight - r.bottom;
+                if (keypadHeight > screenHeight * 0.15) {
+                    MicAnimation.cancelListeningAnimation(listeningAnimation, binding.mic.foreground, binding.mic.background);
+                    listeningAnimation = null;
+                    speechRecognitionManager.stopListening();
+                    binding.micLayout.setVisibility(View.GONE);
+                    Log.d(TAG, "onGlobalLayout: Keyboard OPEN");
+                } else {
+                    Log.d(TAG, "onGlobalLayout: Keyboard CLOSE");
+                    binding.micLayout.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
 
     }
 

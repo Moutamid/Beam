@@ -152,6 +152,9 @@ public class DocumentsFragment extends Fragment {
         list = Stash.getArrayList(Constants.DOCUMENTS, DocumentModel.class);
 
         requestModel = (RequestModel) Stash.getObject(Constants.SAVE_REQUEST, RequestModel.class);
+
+        Log.d(TAG, "requestModel.category: " + requestModel.category);
+
         ArrayList<UserModel> usersList = new ArrayList<>();
         Constants.databaseReference().child(Constants.USER).get().addOnSuccessListener(dataSnapshot -> {
             if (dataSnapshot.exists()) {

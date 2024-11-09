@@ -89,9 +89,7 @@ public class ChatFragment extends Fragment {
 
                     @Override
                     public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                        if (snapshot.exists()) {
 
-                        }
                     }
 
                     @Override
