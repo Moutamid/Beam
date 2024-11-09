@@ -226,8 +226,6 @@ public class UserProfileActivity extends AppCompatActivity {
                 }
             }
         });
-
-
     }
 
     private void closeOrder() {
@@ -273,6 +271,8 @@ public class UserProfileActivity extends AppCompatActivity {
         order.setUserID(userID);
         order.setRequestID(REQUEST_ID);
         order.setRequesterID(REQUESTER_ID);
+        order.setRequest(false);
+
         Constants.databaseReference().child(Constants.ORDER).child(Constants.auth().getCurrentUser().getUid())
                 .child(order.getId()).setValue(order)
                 .addOnSuccessListener(unused -> {
@@ -286,6 +286,8 @@ public class UserProfileActivity extends AppCompatActivity {
         order.setUserID(Constants.auth().getCurrentUser().getUid());
         order.setRequestID(REQUEST_ID);
         order.setRequesterID(REQUESTER_ID);
+        order.setRequest(true);
+
         Constants.databaseReference().child(Constants.ORDER).child(userID)
                 .child(order.getId()).setValue(order)
                 .addOnSuccessListener(unused -> {

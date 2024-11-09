@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -56,7 +57,7 @@ public class NewRequestActivity extends AppCompatActivity {
         userModel = (UserModel) Stash.getObject(Constants.STASH_USER, UserModel.class);
 
         binding.next.setOnClickListener(v -> {
-            binding.previous.setVisibility(View.VISIBLE);
+//            binding.previous.setVisibility(View.VISIBLE);
             if (current.get() == 0) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new DescriptionFragment()).commit();
                 current.incrementAndGet();
@@ -72,28 +73,32 @@ public class NewRequestActivity extends AppCompatActivity {
             }
         });
 
-        binding.previous.setOnClickListener(v -> {
-            if (current.get() == 1) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new CategoryFragment()).commit();
-                current.decrementAndGet();
-                binding.previous.setVisibility(View.GONE);
-            } else if (current.get() == 2) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new DescriptionFragment()).commit();
-                current.decrementAndGet();
-            } else if (current.get() == 3) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new DocumentsFragment()).commit();
-                current.decrementAndGet();
-            }
-            binding.next.setText("Next");
-        });
-
         documents = new ArrayList<>();
 
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (current.get() == 0) {
+                    Stash.clear(Constants.SAVE_REQUEST);
+                    Stash.clear(Constants.DOCUMENTS);
+                    Stash.clear(Constants.REQUESTERS);
+                    finish();
+                } else if (current.get() == 1) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new CategoryFragment()).commit();
+                    current.decrementAndGet();
+                    binding.previous.setVisibility(View.GONE);
+                } else if (current.get() == 2) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new DescriptionFragment()).commit();
+                    current.decrementAndGet();
+                } else if (current.get() == 3) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, new DocumentsFragment()).commit();
+                    current.decrementAndGet();
+                }
+                binding.next.setText("Next");
+            }
+        });
 
         binding.toolbar.back.setOnClickListener(v -> {
-            Stash.clear(Constants.SAVE_REQUEST);
-            Stash.clear(Constants.DOCUMENTS);
-            Stash.clear(Constants.REQUESTERS);
             getOnBackPressedDispatcher().onBackPressed();
         });
         binding.toolbar.refresh.setVisibility(View.VISIBLE);

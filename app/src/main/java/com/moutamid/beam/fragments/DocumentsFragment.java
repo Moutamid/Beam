@@ -150,6 +150,7 @@ public class DocumentsFragment extends Fragment {
         binding = FragmentDocumentsBinding.inflate(getLayoutInflater(), container, false);
 
         list = Stash.getArrayList(Constants.DOCUMENTS, DocumentModel.class);
+        updateView();
 
         requestModel = (RequestModel) Stash.getObject(Constants.SAVE_REQUEST, RequestModel.class);
 

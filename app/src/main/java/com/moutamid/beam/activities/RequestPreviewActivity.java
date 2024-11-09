@@ -266,7 +266,8 @@ public class RequestPreviewActivity extends AppCompatActivity {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(Uri.parse(url), mimeType);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(Intent.createChooser(intent, "Open with"));
+//                startActivity(Intent.createChooser(intent, "Open with"));
+                startActivity(intent);
             } else {
                 Toast.makeText(this, "Something went wrong with the file", Toast.LENGTH_SHORT).show();
             }

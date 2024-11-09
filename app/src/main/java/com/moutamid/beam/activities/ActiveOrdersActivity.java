@@ -17,9 +17,12 @@ import com.moutamid.beam.models.OrderModel;
 import com.moutamid.beam.models.RequestModel;
 import com.moutamid.beam.utilis.Constants;
 
+import org.apache.commons.logging.LogFactory;
+
 import java.util.ArrayList;
 
 public class ActiveOrdersActivity extends AppCompatActivity {
+    private static final org.apache.commons.logging.Log log = LogFactory.getLog(ActiveOrdersActivity.class);
     ActivityActiveOrdersBinding binding;
 
     @Override
@@ -85,6 +88,7 @@ public class ActiveOrdersActivity extends AppCompatActivity {
     }
 
     private static final String TAG = "ActiveOrdersActivity";
+
     private void getOrders(int i) {
         OrderModel order = orders.get(i);
         Log.d(TAG, "getOrders: " + order.requestID);
@@ -94,17 +98,31 @@ public class ActiveOrdersActivity extends AppCompatActivity {
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             RequestModel requestModel = dataSnapshot.getValue(RequestModel.class);
                             requestModel.key = order.requestID;
-                            if (requestModel.userID.equals(order.userID)) list.add(requestModel);
+                            Log.d(TAG, "getOrders: " + requestModel.userID);
+                            Log.d(TAG, "getOrders: " + order.userID);
+                            if (requestModel.userID.equals(order.userID) && !Constants.auth().getCurrentUser().getUid().equals(order.userID)) {
+                                list.add(requestModel);
+                            } else getRequest(order);
                         }
-                        if (i == orders.size() - 1) {
-                            if (!isDestroyed() && !isFinishing()) {
-                                Constants.dismissDialog();
-                                adapter = new ActiveOrdersAdapter(ActiveOrdersActivity.this, list);
-                                binding.recycler.setAdapter(adapter);
-                            }
-                        } else getOrders(i + 1);
-                    } else {
-                        Constants.dismissDialog();
+                    }
+                    if (i == orders.size() - 1) {
+                        if (!isDestroyed() && !isFinishing()) {
+                            Constants.dismissDialog();
+                            adapter = new ActiveOrdersAdapter(ActiveOrdersActivity.this, list);
+                            binding.recycler.setAdapter(adapter);
+                        }
+                    } else getOrders(i + 1);
+                });
+    }
+
+    private void getRequest(OrderModel order) {
+        Log.d(TAG, "getRequest: ");
+        Constants.databaseReference().child(Constants.REQUESTS).child(order.userID).child(order.requestID)
+                .get().addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        RequestModel requestModel = snapshot.getValue(RequestModel.class);
+                        requestModel.key = order.requestID;
+                        list.add(requestModel);
                     }
                 });
     }

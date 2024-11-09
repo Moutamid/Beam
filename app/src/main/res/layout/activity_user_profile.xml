@@ -235,12 +235,51 @@
     </RelativeLayout>
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/docLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        app:cardBackgroundColor="@color/white"
+        android:layout_below="@id/mainLayout"
+        app:cardCornerRadius="12dp"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/noDocument"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center"
+                android:text="No Documents Attach"
+                android:textColor="@color/blue" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/documentsRC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/documents" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/micLayout"
-        android:layout_below="@id/mainLayout"
+        android:layout_below="@id/docLayout"
         app:cardBackgroundColor="@color/white"
         android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="0dp"
         app:strokeWidth="1dp">
@@ -265,15 +304,6 @@
         <include
             android:id="@+id/mic"
             layout="@layout/mic_button" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text=""
-            android:textColor="@color/green"
-            android:textStyle="bold" />
 
     </LinearLayout>
 

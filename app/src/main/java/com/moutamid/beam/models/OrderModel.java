@@ -2,6 +2,7 @@ package com.moutamid.beam.models;
 
 public class OrderModel {
     public String id, userID, requestID, requesterID;
+    public boolean isRequest;
 
     public OrderModel() {}
 
@@ -35,5 +36,13 @@ public class OrderModel {
 
     public void setRequesterID(String requesterID) {
         this.requesterID = requesterID;
+    }
+
+    public boolean isRequest() {
+        return isRequest;
+    }
+
+    public void setRequest(boolean request) {
+        isRequest = request;
     }
 }
